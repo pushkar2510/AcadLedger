@@ -179,7 +179,7 @@ export function Header({ user = null }: HeaderProps) {
       > 
       {/* font-bold p-2 */}
         <Link href="/" className="font-bold p-2">
-          PlaceTrix
+          AceLedger
         </Link>
 
         {/* Desktop nav */}

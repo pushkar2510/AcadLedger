@@ -1,136 +1,100 @@
-import { cn } from "@/lib/utils";
+import { Logo } from "@/components/logo";
 import { Button } from "@/components/ui/button";
-import {
-  FacebookIcon,
-  GithubIcon,
-  InstagramIcon,
-  LinkedinIcon,
-  YoutubeIcon,
-} from "lucide-react";
+import { GithubIcon } from "lucide-react";
 
-export function Footer() {
-  return (
-    <footer className="relative">
-      <div
-        className={cn(
-          "mx-auto max-w-5xl",
-          "dark:bg-[radial-gradient(35%_80%_at_25%_0%,--theme(--color-foreground/.04),transparent)]",
-        )}
-      >
-        <div className="grid max-w-5xl grid-cols-6 gap-6 p-4">
-          <div className="col-span-6 flex flex-col gap-4 pt-5 md:col-span-4">
-            <a className="font-bold" href="#">
-              PlaceTrix
-            </a>
-            <p className="max-w-sm text-balance text-muted-foreground text-sm">
-              Verified Skills. Real Opportunities.
-            </p>
-            <div className="flex gap-2">
-              {socialLinks.map((item, index) => (
-                <Button
-                  asChild
-                  key={`social-${item.link}-${index}`}
-                  size="icon-sm"
-                  variant="outline"
-                >
-                  <a href={item.link} target="_blank">
-                    {item.icon}
-                  </a>
-                </Button>
-              ))}
-            </div>
-          </div>
-          <div className="col-span-3 w-full md:col-span-1">
-            <span className="text-muted-foreground text-xs">Resources</span>
-            <div className="mt-2 flex flex-col gap-2">
-              {resources.map(({ href, title }) => (
-                <a
-                  className="w-max text-sm hover:underline"
-                  href={href}
-                  key={title}
-                >
-                  {title}
-                </a>
-              ))}
-            </div>
-          </div>
-          <div className="col-span-3 w-full md:col-span-1">
-            <span className="text-muted-foreground text-xs">Company</span>
-            <div className="mt-2 flex flex-col gap-2">
-              {company.map(({ href, title }) => (
-                <a
-                  className="w-max text-sm hover:underline"
-                  href={href}
-                  key={title}
-                >
-                  {title}
-                </a>
-              ))}
-            </div>
-          </div>
-        </div>
-        <div className="absolute inset-x-0 h-px w-full bg-border" />
-        <div className="flex max-w-4xl flex-col justify-between gap-2 py-4">
-          <p className="text-center font-light text-muted-foreground text-sm">
-            &copy; {new Date().getFullYear()}, AcadLedger. All rights reserved
-          </p>
-        </div>
-      </div>
-    </footer>
-  );
-}
-
-const company = [
- 
-  {
-    title: "Privacy Policy",
-    href: "/privacy-policy",
-  },
-  {
-    title: "Terms of Service",
-    href: "/terms-of-service",
-  },
-];
-
-const resources = [
-  {
-    title: "Pricing",
-    href: "#",
-  },
-  {
-    title: "Help Center",
-    href: "#",
-  },
-  {
-    title: "FAQs",
-    href: "#",
-  },
+const navLinks = [
+	{ href: "#", label: "Features" },
+	{ href: "#", label: "Blog" },
+	{ href: "#", label: "About" },
+	{ href: "#", label: "Contact" },
+	{ href: "#", label: "Licence" },
+	{ href: "#", label: "Privacy" },
 ];
 
 const socialLinks = [
-  {
-    icon: <LinkedinIcon />,
-    link: "https://www.linkedin.com/in/vishalraut2106/",
-  },
-  {
-    icon: <InstagramIcon />,
-    link: "https://www.instagram.com/vishalraut.05/",
-  },
-  {
-    icon: <GithubIcon />,
-    link: "https://github.com/vishalraut2106",
-  },
+	{
+		href: "#",
+		label: "X",
+		icon: <XIcon />,
+	},
+	{
+		href: "#",
+		label: "Github",
+		icon: (
+			<GithubIcon
+			/>
+		),
+	},
 ];
 
+export function Footer() {
+	return (
+		<footer className="mx-auto max-w-5xl *:px-4 *:md:px-6">
+			<div className="flex flex-col gap-6 py-6">
+				<div className="flex items-center justify-between">
+					<div className="flex items-center gap-2">
+						<Logo className="h-4.5" />
+					</div>
+					<div className="flex items-center">
+						{socialLinks.map(({ href, label, icon }) => (
+							<Button asChild key={label} size="icon-sm" variant="ghost">
+								<a aria-label={label} href={href}>
+									{icon}
+								</a>
+							</Button>
+						))}
+					</div>
+				</div>
+
+				<nav>
+					<ul className="flex flex-wrap gap-4 font-medium text-muted-foreground text-sm md:gap-6">
+						{navLinks.map((link) => (
+							<li key={link.label}>
+								<a className="hover:text-foreground" href={link.href}>
+									{link.label}
+								</a>
+							</li>
+						))}
+					</ul>
+				</nav>
+			</div>
+
+			<div className="flex items-center justify-between gap-4 border-t py-4 text-muted-foreground text-sm">
+				<p>&copy; {new Date().getFullYear()} efferd</p>
+
+				<p className="inline-flex items-center gap-1">
+					<span>Built by</span>
+					<a
+						aria-label="x/twitter"
+						className="inline-flex items-center gap-1 text-foreground/80 hover:text-foreground hover:underline"
+						href={"https://x.com/shabanhr"}
+						rel="noreferrer"
+						target="_blank"
+					>
+						<img
+							alt="shaban"
+							className="size-4 rounded-full"
+							height="auto"
+							src="https://github.com/shabanhr.png"
+							width="auto"
+						/>
+						Shaban
+					</a>
+				</p>
+			</div>
+		</footer>
+	);
+}
+
 function XIcon(props: React.ComponentProps<"svg">) {
-  return (
-    <svg
-      fill="currentColor"
-      viewBox="0 0 24 24"
-      xmlns="http://www.w3.org/2000/svg"
-      {...props}
-    >
-      <path d="m18.9,1.153h3.682l-8.042,9.189,9.46,12.506h-7.405l-5.804-7.583-6.634,7.583H.469l8.6-9.831L0,1.153h7.593l5.241,6.931,6.065-6.931Zm-1.293,19.494h2.039L6.482,3.239h-2.19l13.314,17.408Z" />
-    </svg>
-  );
+	return (
+		<svg
+			fill="currentColor"
+			viewBox="0 0 24 24"
+			xmlns="http://www.w3.org/2000/svg"
+			{...props}
+		>
+			<path d="m18.9,1.153h3.682l-8.042,9.189,9.46,12.506h-7.405l-5.804-7.583-6.634,7.583H.469l8.6-9.831L0,1.153h7.593l5.241,6.931,6.065-6.931Zm-1.293,19.494h2.039L6.482,3.239h-2.19l13.314,17.408Z" />
+		</svg>
+	);
 }
