@@ -1060,7 +1060,7 @@ export function ResumeGeneratorClient() {
                     subtitle={[edu.degree, edu.field].filter(Boolean).join(", ")}
                     canRemove={data.education.length > 1} onRemove={() => removeEdu(edu.id)} defaultOpen={idx === 0}>
                     <div className="space-y-2"><Label>Institution <Req /></Label>
-                      <Input placeholder="Massachusetts Institute of Technology" value={edu.institution} onChange={(e) => setEdu(edu.id, "institution", e.target.value)} /></div>
+                      <Input placeholder="Massachusetts Recruiter of Technology" value={edu.institution} onChange={(e) => setEdu(edu.id, "institution", e.target.value)} /></div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div className="space-y-2"><Label>Degree</Label>
                         <Input placeholder="Bachelor of Science" value={edu.degree} onChange={(e) => setEdu(edu.id, "degree", e.target.value)} /></div>

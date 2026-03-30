@@ -69,11 +69,9 @@ const USERNAME_REGEX = /^[a-zA-Z0-9_]{3,20}$/;
 
 type UsernameStatus = "idle" | "checking" | "available" | "taken" | "invalid" | "unchanged";
 
-interface InstituteOption {
+interface RecruiterOption {
   profile_id: string;
-  institute_name: string;
-  courses: string[] | null;
-  affiliation: string | null;
+  company_name: string;
 }
 
 interface Props {
@@ -337,8 +335,8 @@ export function CandidateSettingsClient({ userProfile, initialData }: Props) {
   const [permanentAddress, setPermanentAddress] = useState(initialData?.permanent_address ?? "");
 
   // Education
-  const [instituteId, setInstituteId] = useState<string>(initialData?.institute_id ?? "");
-  const [instituteName, setInstituteName] = useState("");
+  const [recruiterId, setRecruiterId] = useState<string>(initialData?.recruiter_id ?? "");
+  const [recruiterName, setRecruiterName] = useState("");
   const [courseName, setCourseName] = useState(initialData?.course_name ?? "");
   const [passoutYear, setPassoutYear] = useState(
     initialData?.passout_year ? String(initialData.passout_year) : ""
@@ -379,8 +377,8 @@ export function CandidateSettingsClient({ userProfile, initialData }: Props) {
     initialData?.portfolio_links?.length ? initialData.portfolio_links : [""]
   );
 
-  // Institute lookup
-  const [institutes, setInstitutes] = useState<InstituteOption[]>([]);
+  // Recruiter lookup
+  const [recruiters, setRecruiters] = useState<RecruiterOption[]>([]);
   const [availableCourses, setAvailableCourses] = useState<string[]>([]);
   const [selectedAffiliation, setSelectedAffiliation] = useState<string | null>(null);
 
@@ -483,36 +481,27 @@ export function CandidateSettingsClient({ userProfile, initialData }: Props) {
     return () => window.removeEventListener("beforeunload", handler);
   }, [isDirty]);
 
-  // ─── Load institutes ─────────────────────────────────────────────────────────
+  // ─── Load recruiters ─────────────────────────────────────────────────────────
 
   useEffect(() => {
     (async () => {
       const { data } = await supabase
-        .from("institute_profiles")
-        .select("profile_id, institute_name, courses, affiliation")
-        .order("institute_name");
+        .from("recruiter_profiles")
+        .select("profile_id, company_name")
+        .order("company_name");
       if (data) {
-        setInstitutes(data);
-        if (initialData?.institute_id) {
-          const found = data.find((i) => i.profile_id === initialData.institute_id);
+        setRecruiters(data);
+        if (initialData?.recruiter_id) {
+          const found = data.find((i) => i.profile_id === initialData.recruiter_id);
           if (found) {
-            setInstituteName(found.institute_name);
-            setAvailableCourses(found.courses ?? []);
-            setSelectedAffiliation(found.affiliation ?? null);
+            setRecruiterName(found.company_name);
           }
         }
       }
     })();
   }, []);
 
-  useEffect(() => {
-    const found = institutes.find((i) => i.profile_id === instituteId);
-    if (found) {
-      setAvailableCourses(found.courses ?? []);
-      setSelectedAffiliation(found.affiliation ?? null);
-      if (!found.courses?.includes(courseName)) setCourseName("");
-    }
-  }, [instituteId]);
+
 
   // ─── Avatar upload ───────────────────────────────────────────────────────────
 
@@ -569,16 +558,16 @@ export function CandidateSettingsClient({ userProfile, initialData }: Props) {
     }
   }
 
-  // ─── Institute select ────────────────────────────────────────────────────────
+  // ─── Recruiter select ────────────────────────────────────────────────────────
 
-  function handleInstituteSelect(name: string | null) {
+  function handleRecruiterSelect(name: string | null) {
     if (!name) {
-      setInstituteId(""); setInstituteName(""); setAvailableCourses([]); setSelectedAffiliation(null); setIsDirty(true); return;
+      setRecruiterId(""); setRecruiterName(""); setAvailableCourses([]); setSelectedAffiliation(null); setIsDirty(true); return;
     }
-    const found = institutes.find((i) => i.institute_name === name);
+    const found = recruiters.find((i) => i.recruiter_name === name);
     if (found) {
-      setInstituteId(found.profile_id);
-      setInstituteName(found.institute_name);
+      setRecruiterId(found.profile_id);
+      setRecruiterName(found.recruiter_name);
       setAvailableCourses(found.courses ?? []);
       setSelectedAffiliation(found.affiliation ?? null);
       setIsDirty(true);
@@ -742,7 +731,7 @@ export function CandidateSettingsClient({ userProfile, initialData }: Props) {
     if (!phoneNumber.trim()) e.phoneNumber = "Contact number is required";
     else if (!/^[0-9]{10}$/.test(phoneNumber)) e.phoneNumber = "Must be exactly 10 digits";
     if (!dateOfBirth) e.dateOfBirth = "Date of birth is required";
-    if (!instituteId) e.institute = "Institution is required";
+    if (!recruiterId) e.recruiter = "Institution is required";
     if (!courseName) e.courseName = "Course/branch is required";
     if (!passoutYear) e.passoutYear = "Expected graduation year is required";
     if (!sscPercentage) e.sscPercentage = "SSC percentage is required";
@@ -772,7 +761,7 @@ export function CandidateSettingsClient({ userProfile, initialData }: Props) {
     setAadhaarNumber(initialData?.aadhaar_number ?? "");
     setCurrentAddress(initialData?.current_address ?? "");
     setPermanentAddress(initialData?.permanent_address ?? "");
-    setInstituteId(initialData?.institute_id ?? "");
+    setRecruiterId(initialData?.recruiter_id ?? "");
     setCourseName(initialData?.course_name ?? "");
     setPassoutYear(initialData?.passout_year ? String(initialData.passout_year) : "");
     setSscPercentage(initialData?.ssc_percentage != null ? String(initialData.ssc_percentage) : "");
@@ -834,7 +823,7 @@ export function CandidateSettingsClient({ userProfile, initialData }: Props) {
         aadhaar_number: aadhaarNumber.trim() || null,
         current_address: currentAddress.trim() || null,
         permanent_address: permanentAddress.trim() || null,
-        institute_id: instituteId || null,
+        recruiter_id: recruiterId || null,
         course_name: courseName || null,
         passout_year: passoutYear ? Number(passoutYear) : null,
         ssc_percentage: sscPercentage ? Number(sscPercentage) : null,
@@ -899,7 +888,7 @@ export function CandidateSettingsClient({ userProfile, initialData }: Props) {
 
   // ─── Render ───────────────────────────────────────────────────────────────────
 
-  const instituteNames = institutes.map((i) => i.institute_name);
+  const recruiterNames = recruiters.map((i) => i.recruiter_name);
   const usernameMsg = usernameStatusMessage(usernameStatus);
 
   return (
@@ -1139,7 +1128,7 @@ export function CandidateSettingsClient({ userProfile, initialData }: Props) {
               <CardContent className="space-y-4">
                 <div className="space-y-2">
                   <Label>Institution<RequiredMark /></Label>
-                  <Combobox items={instituteNames} value={instituteName} onValueChange={handleInstituteSelect}>
+                  <Combobox items={recruiterNames} value={recruiterName} onValueChange={handleRecruiterSelect}>
                     <ComboboxInput placeholder="Search institution…" />
                     <ComboboxContent>
                       <ComboboxEmpty>No institution found.</ComboboxEmpty>
@@ -1154,15 +1143,15 @@ export function CandidateSettingsClient({ userProfile, initialData }: Props) {
                       Affiliated to {selectedAffiliation}
                     </p>
                   )}
-                  <FieldError message={errors.institute} />
+                  <FieldError message={errors.recruiter} />
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label>Branch / Course<RequiredMark /></Label>
-                    <Combobox items={availableCourses} value={courseName} onValueChange={(v) => handleCourseName(v)} disabled={!instituteId}>
+                    <Combobox items={availableCourses} value={courseName} onValueChange={(v) => handleCourseName(v)} disabled={!recruiterId}>
                       <ComboboxInput
-                        placeholder={!instituteId ? "Select institution first" : availableCourses.length ? "Select course" : "No courses available"}
+                        placeholder={!recruiterId ? "Select institution first" : availableCourses.length ? "Select course" : "No courses available"}
                       />
                       <ComboboxContent>
                         <ComboboxEmpty>No course found.</ComboboxEmpty>

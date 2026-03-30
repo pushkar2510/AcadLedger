@@ -1,7 +1,7 @@
 "use client"
 
 // ─────────────────────────────────────────────────────────────────────────────
-// app/~/tests/[id]/InstituteTestDetailClient.tsx
+// app/~/tests/[id]/RecruiterTestDetailClient.tsx
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { useState, useCallback, useEffect, useRef, type ReactNode } from "react"
@@ -71,7 +71,7 @@ import {
   ArrowUpDown,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
-import type { InstituteTestDetail, InstituteQuestion, InstituteAttemptRow } from "./_types"
+import type { RecruiterTestDetail, RecruiterQuestion, RecruiterAttemptRow } from "./_types"
 import { formatDuration, formatDateTime, formatSeconds, resolvePct } from "./_types"
 
 
@@ -104,7 +104,7 @@ function useActionState() {
 
 // ─── Stats Bar ────────────────────────────────────────────────────────────────
 
-function StatsBar({ test, liveAttempts }: { test: InstituteTestDetail; liveAttempts: InstituteAttemptRow[] }) {
+function StatsBar({ test, liveAttempts }: { test: RecruiterTestDetail; liveAttempts: RecruiterAttemptRow[] }) {
   const submitted = liveAttempts.filter((a) => a.status === "submitted")
   const inProgress = liveAttempts.filter((a) => a.status === "in_progress")
   const totalMarks = test.questions.reduce((s, q) => s + q.marks, 0)
@@ -211,7 +211,7 @@ function QuestionCard({
   question,
   index,
 }: {
-  question: InstituteQuestion
+  question: RecruiterQuestion
   index: number
 }) {
   const sortedOptions = [...question.options].sort((a, b) => a.order_index - b.order_index)
@@ -308,7 +308,7 @@ function QuestionCard({
 
 // ─── Questions Tab (Answer Key) ───────────────────────────────────────────────
 
-function QuestionsTab({ questions }: { questions: InstituteQuestion[] }) {
+function QuestionsTab({ questions }: { questions: RecruiterQuestion[] }) {
   const totalMarks = questions.reduce((s, q) => s + q.marks, 0)
 
   return (
@@ -360,7 +360,7 @@ function AttemptScore({
   attempt,
   scoresVisible,
 }: {
-  attempt: InstituteAttemptRow
+  attempt: RecruiterAttemptRow
   scoresVisible: boolean
 }) {
   if (attempt.status !== "submitted") {
@@ -387,7 +387,7 @@ function AttemptScore({
 
 // ─── Attempts Tab ─────────────────────────────────────────────────────────────
 
-function AttemptsTab({ test, liveAttempts }: { test: InstituteTestDetail; liveAttempts: InstituteAttemptRow[] }) {
+function AttemptsTab({ test, liveAttempts }: { test: RecruiterTestDetail; liveAttempts: RecruiterAttemptRow[] }) {
   const attempts = liveAttempts
   const [scoresVisible, setScoresVisible] = useState(false)
 
@@ -522,11 +522,11 @@ function AttemptsTab({ test, liveAttempts }: { test: InstituteTestDetail; liveAt
 
     let currentY = 14
 
-    if (test.institute_name) {
+    if (test.recruiter_name) {
       doc.setFont("helvetica", "bold")
       doc.setFontSize(8)
       doc.setTextColor(120, 120, 120)
-      doc.text(test.institute_name.toUpperCase(), 14, currentY)
+      doc.text(test.recruiter_name.toUpperCase(), 14, currentY)
       currentY += 6
     }
 
@@ -855,7 +855,7 @@ function OverviewTab({
   isTogglePublishLoading,
   anyLoading,
 }: {
-  test: InstituteTestDetail
+  test: RecruiterTestDetail
   onToggleResults: () => void
   onTogglePublish: () => void
   isToggleResultsLoading: boolean
@@ -986,13 +986,13 @@ function OverviewTab({
 
 interface Props {
   testId: string
-  test: InstituteTestDetail
+  test: RecruiterTestDetail
   onToggleResults?: () => Promise<void>
   onTogglePublish?: () => Promise<void>
   onDeleteTest?: () => Promise<void>
 }
 
-export function InstituteTestDetailClient({
+export function RecruiterTestDetailClient({
   testId,
   test,
   onToggleResults,
@@ -1004,7 +1004,7 @@ export function InstituteTestDetailClient({
   const { run, isLoading, anyLoading } = useActionState()
 
   // ── Live attempts state ──────────────────────────────────────────────────
-  const [liveAttempts, setLiveAttempts] = useState<InstituteAttemptRow[]>(test.attempts)
+  const [liveAttempts, setLiveAttempts] = useState<RecruiterAttemptRow[]>(test.attempts)
   const channelRef = useRef<ReturnType<ReturnType<typeof createClient>["channel"]> | null>(null)
 
   // Re-fetch the full attempts list from the client side
@@ -1051,7 +1051,7 @@ export function InstituteTestDetailClient({
 
     const fullTotalMarks = test.questions.reduce((s, q) => s + q.marks, 0)
 
-    const freshAttempts: InstituteAttemptRow[] = (rawAttempts ?? [])
+    const freshAttempts: RecruiterAttemptRow[] = (rawAttempts ?? [])
       .filter(
         (a): a is typeof a & { id: string; started_at: string } =>
           a.id != null && a.started_at != null
@@ -1062,7 +1062,7 @@ export function InstituteTestDetailClient({
           id: a.id,
           student_name: a.student_name ?? null,
           student_email: a.student_email ?? null,
-          status: a.status as InstituteAttemptRow["status"],
+          status: a.status as RecruiterAttemptRow["status"],
           score: a.score ?? null,
           total_marks: fullTotalMarks > 0 ? fullTotalMarks : (a.total_marks ?? null),
           percentage:
@@ -1121,9 +1121,9 @@ export function InstituteTestDetailClient({
         {/* ── Page Header ─────────────────────────────────────────────────── */}
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div className="space-y-1 min-w-0">
-            {test.institute_name && (
+            {test.recruiter_name && (
               <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
-                {test.institute_name}
+                {test.recruiter_name}
               </p>
             )}
             <div className="flex min-w-0 flex-wrap items-center gap-2">

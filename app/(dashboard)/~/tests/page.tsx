@@ -4,12 +4,12 @@ import { redirect } from "next/navigation"
 import { createClient } from "@/lib/supabase/server"
 import { getUserProfile } from "@/lib/supabase/profile"
 import { CandidateTestsClient } from "./CandidateTestsClient"
-import { InstituteTestsClient } from "./InstituteTestsClient"
+import { RecruiterTestsClient } from "./RecruiterTestsClient"
 import {
   deriveStatus,
   type CandidateTest,
   type CandidateTestAttempt,
-  type InstituteTest,
+  type RecruiterTest,
 } from "./_types"
 
 export const metadata = {
@@ -22,14 +22,14 @@ export const metadata = {
 async function fetchCandidateTests(userId: string): Promise<CandidateTest[]> {
   const supabase = await createClient()
 
-  // 1. Resolve the candidate's institute
+  // 1. Resolve the candidate's recruiter
   const { data: candidateProfile } = await supabase
     .from("candidate_profiles")
-    .select("institute_id")
+    .select("recruiter_id")
     .eq("profile_id", userId)
     .maybeSingle()
 
-  if (!candidateProfile?.institute_id) {
+  if (!candidateProfile?.recruiter_id) {
     return []
   }
 
@@ -40,7 +40,7 @@ async function fetchCandidateTests(userId: string): Promise<CandidateTest[]> {
       "id, title, description, time_limit_seconds, available_from, available_until, results_available"
     )
     .eq("status", "published")
-    .eq("institute_id", candidateProfile.institute_id)
+    .eq("recruiter_id", candidateProfile.recruiter_id)
     .order("available_from", { ascending: false })
 
   const { data: rawTests } = await testsQuery
@@ -108,32 +108,32 @@ async function fetchCandidateTests(userId: string): Promise<CandidateTest[]> {
   })
 }
 
-// ─── Institute data ───────────────────────────────────────────────────────────
+// ─── Recruiter data ───────────────────────────────────────────────────────────
 
-async function fetchInstituteTests(userId: string): Promise<InstituteTest[]> {
+async function fetchRecruiterTests(userId: string): Promise<RecruiterTest[]> {
   const supabase = await createClient()
 
   const { data: rawTests } = await supabase
     .from("view_test_summary")
     .select("*")
-    .eq("institute_id", userId)
+    .eq("recruiter_id", userId)
     .order("id", { ascending: false }) // Fallback order if created_at not in view (it is not, let me check)
 
   // Note: I should add created_at to view_test_summary if I want to maintain the same order.
   // Actually, I'll update the view definition to include created_at.
 
-  return (rawTests ?? []).map((t): InstituteTest => ({
+  return (rawTests ?? []).map((t): RecruiterTest => ({
     id: t.id ?? "",
     title: t.title ?? "Untitled",
-    description: t.description ?? undefined,
+    description: (t as any).description ?? undefined,
     time_limit_seconds: t.time_limit_seconds ?? undefined,
     available_from: t.available_from ?? undefined,
     available_until: t.available_until ?? undefined,
     derived_status: deriveStatus(t.status ?? "draft", t.available_from ?? null, t.available_until ?? null),
     status: (t.status as "draft" | "published") ?? "draft",
-    results_available: t.results_available ?? false,
+    results_available: (t as any).results_available ?? false,
     question_count: t.question_count ?? 0,
-    attempt_count: t.total_attempts ?? 0,
+    attempt_count: t.attempt_count ?? 0,
   }))
 }
 
@@ -148,9 +148,9 @@ export default async function TestsPage() {
     return <CandidateTestsClient tests={tests} />
   }
 
-  if (profile.account_type === "institute") {
-    const tests = await fetchInstituteTests(profile.id)
-    return <InstituteTestsClient tests={tests} />
+  if (profile.account_type === "recruiter") {
+    const tests = await fetchRecruiterTests(profile.id)
+    return <RecruiterTestsClient tests={tests} />
   }
 
   redirect("/~/tests")

@@ -68,34 +68,34 @@ export interface CandidateTestDetail
     | "shuffle_questions"
     | "shuffle_options"
   > {
-  institute_name: string | null
+  recruiter_name: string | null
   /** Lightweight list — only marks needed for the pre-test totals display */
   questions: Pick<QuestionRow, "marks">[]
 }
 
 
 
-// ─── Institute ────────────────────────────────────────────────────────────────
+// ─── Recruiter ────────────────────────────────────────────────────────────────
 
-export type InstituteOption = Pick<
+export type RecruiterOption = Pick<
   OptionRow,
   "id" | "option_text" | "is_correct" | "order_index"
 >
 
-export interface InstituteQuestion
+export interface RecruiterQuestion
   extends Pick<
     QuestionRow,
     "id" | "question_text" | "question_type" | "marks" | "order_index" | "explanation"
   > {
   question_type: "single_correct" | "multiple_correct"  // narrow
-  options: InstituteOption[]
+  options: RecruiterOption[]
   tags: Pick<TagRow, "id" | "name">[]
 }
 
 // AttemptDetail is a view — all columns are nullable in generated types.
 // We override the fields we know are structurally non-null using MergeDeep,
 // OR simply Pick + override manually (no extra dependency needed):
-export interface InstituteAttemptRow
+export interface RecruiterAttemptRow
   extends Pick<
     AttemptDetail,
     | "student_name"
@@ -114,7 +114,7 @@ export interface InstituteAttemptRow
   passout_year: number | null
 }
 
-export interface InstituteTestDetail
+export interface RecruiterTestDetail
   extends Pick<
     TestRow,
     | "id"
@@ -127,9 +127,9 @@ export interface InstituteTestDetail
     | "results_available"
   > {
   status: "draft" | "published" | "archived"  // narrow the DB string
-  institute_name: string | null
-  questions: InstituteQuestion[]
-  attempts: InstituteAttemptRow[]
+  recruiter_name: string | null
+  questions: RecruiterQuestion[]
+  attempts: RecruiterAttemptRow[]
 }
 
 

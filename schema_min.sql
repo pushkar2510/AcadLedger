@@ -50,20 +50,20 @@ BEGIN
     SELECT * INTO v_profile 
     FROM public.candidate_profiles 
     WHERE profile_id = p_profile_id;
-    IF v_profile.profile_id IS NOT NULL AND v_profile.institute_id IS NOT NULL THEN
+    IF v_profile.profile_id IS NOT NULL AND v_profile.recruiter_id IS NOT NULL THEN
         SELECT count(*) INTO v_total_tests
         FROM public.tests
-        WHERE status = 'published' AND institute_id = v_profile.institute_id;
+        WHERE status = 'published' AND recruiter_id = v_profile.recruiter_id;
         SELECT count(*) INTO v_live_tests
         FROM public.tests
         WHERE status = 'published' 
-          AND institute_id = v_profile.institute_id
+          AND recruiter_id = v_profile.recruiter_id
           AND (available_from IS NULL OR available_from <= v_now)
           AND (available_until IS NULL OR available_until >= v_now);
         SELECT count(*) INTO v_upcoming_tests
         FROM public.tests
         WHERE status = 'published' 
-          AND institute_id = v_profile.institute_id
+          AND recruiter_id = v_profile.recruiter_id
           AND available_from > v_now;
         SELECT count(*) INTO v_completed_tests
         FROM public.test_attempts
@@ -80,7 +80,7 @@ BEGIN
     );
 END;
 $$;
-CREATE OR REPLACE FUNCTION public.get_institute_home_stats(p_profile_id uuid) RETURNS jsonb
+CREATE OR REPLACE FUNCTION public.get_recruiter_home_stats(p_profile_id uuid) RETURNS jsonb
     LANGUAGE plpgsql SECURITY DEFINER
     SET search_path TO 'public'
     AS $$
@@ -95,35 +95,35 @@ DECLARE
     v_total_attempts BIGINT := 0;
 BEGIN
     SELECT * INTO v_profile 
-    FROM public.institute_profiles 
+    FROM public.recruiter_profiles 
     WHERE profile_id = p_profile_id;
     SELECT count(*) INTO v_total_tests
     FROM public.tests
-    WHERE institute_id = p_profile_id;
+    WHERE recruiter_id = p_profile_id;
     SELECT count(*) INTO v_live_tests
     FROM public.tests
-    WHERE institute_id = p_profile_id 
+    WHERE recruiter_id = p_profile_id 
       AND status = 'published' 
       AND (available_from IS NULL OR available_from <= v_now)
       AND (available_until IS NULL OR available_until >= v_now);
     SELECT count(*) INTO v_upcoming_tests
     FROM public.tests
-    WHERE institute_id = p_profile_id 
+    WHERE recruiter_id = p_profile_id 
       AND status = 'published'
       AND available_from > v_now;
     SELECT count(*) INTO v_past_tests
     FROM public.tests
-    WHERE institute_id = p_profile_id 
+    WHERE recruiter_id = p_profile_id 
       AND status = 'published'
       AND available_until < v_now;
     SELECT count(*) INTO v_draft_tests
     FROM public.tests
-    WHERE institute_id = p_profile_id 
+    WHERE recruiter_id = p_profile_id 
       AND status = 'draft';
     SELECT count(*) INTO v_total_attempts
     FROM public.test_attempts ta
     JOIN public.tests t ON ta.test_id = t.id
-    WHERE t.institute_id = p_profile_id;
+    WHERE t.recruiter_id = p_profile_id;
     RETURN jsonb_build_object(
         'profile', (CASE WHEN v_profile.profile_id IS NOT NULL THEN row_to_json(v_profile) ELSE NULL END),
         'stats', jsonb_build_object(
@@ -327,15 +327,15 @@ DECLARE
     v_completed_count INT;
     v_saved_answers JSONB;
 BEGIN
-    SELECT institute_id, profile_complete, profile_updated 
+    SELECT recruiter_id, profile_complete, profile_updated 
     INTO v_profile FROM public.candidate_profiles WHERE profile_id = v_user_id;
     IF v_profile IS NULL OR NOT COALESCE(v_profile.profile_complete, FALSE) OR NOT COALESCE(v_profile.profile_updated, FALSE) THEN
         RETURN jsonb_build_object('error', 'Profile incomplete');
     END IF;
-    SELECT id, status, institute_id, time_limit_seconds, max_attempts, title
+    SELECT id, status, recruiter_id, time_limit_seconds, max_attempts, title
     INTO v_test FROM public.tests WHERE id = p_test_id;
-    IF v_test IS NULL OR v_test.status != 'published' OR v_test.institute_id != v_profile.institute_id THEN
-        RETURN jsonb_build_object('error', 'Test not available or invalid institute');
+    IF v_test IS NULL OR v_test.status != 'published' OR v_test.recruiter_id != v_profile.recruiter_id THEN
+        RETURN jsonb_build_object('error', 'Test not available or invalid recruiter');
     END IF;
     SELECT id, started_at, expires_at, tab_switch_count 
     INTO v_existing_attempt
@@ -452,11 +452,11 @@ DECLARE
   v_opt_idx int;
   v_opt_ids uuid[];
 BEGIN
-  IF EXISTS (SELECT 1 FROM public.tests WHERE id = p_test_id AND institute_id <> v_user_id) THEN
+  IF EXISTS (SELECT 1 FROM public.tests WHERE id = p_test_id AND recruiter_id <> v_user_id) THEN
     RAISE EXCEPTION 'Access denied';
   END IF;
   INSERT INTO public.tests (
-    id, institute_id, title, description, instructions, 
+    id, recruiter_id, title, description, instructions, 
     time_limit_seconds, available_from, available_until, status,
     shuffle_questions, shuffle_options, strict_mode
   ) VALUES (
@@ -563,14 +563,14 @@ begin
   return null;
 end;
 $$;
-CREATE OR REPLACE FUNCTION public.sync_institute_profile() RETURNS trigger
+CREATE OR REPLACE FUNCTION public.sync_recruiter_profile() RETURNS trigger
     LANGUAGE plpgsql SECURITY DEFINER
     SET search_path TO 'public'
     AS $$
 begin
   update public.profiles
   set
-    display_name = nullif(trim(new.institute_name), ''),
+    display_name = nullif(trim(new.recruiter_name), ''),
     avatar_path   = new.logo_path
   where id = new.profile_id;
   return null;
@@ -623,7 +623,7 @@ CREATE TABLE public.profiles (
     is_active boolean DEFAULT true NOT NULL,
     created_at timestamp with time zone DEFAULT now() NOT NULL,
     updated_at timestamp with time zone DEFAULT now() NOT NULL,
-    CONSTRAINT profiles_account_type_check CHECK ((account_type = ANY (ARRAY['admin'::text, 'institute'::text, 'recruiter'::text, 'candidate'::text, 'tpo'::text]))),
+    CONSTRAINT profiles_account_type_check CHECK ((account_type = ANY (ARRAY['admin'::text, 'recruiter'::text, 'recruiter'::text, 'candidate'::text, 'tpo'::text]))),
     CONSTRAINT profiles_username_check CHECK ((username ~* '^[a-zA-Z0-9_]{3,20}$'::text))
 );
 CREATE TABLE public.test_attempts (
@@ -680,8 +680,8 @@ CREATE TABLE public.candidate_profiles (
     aadhaar_number text,
     current_address text,
     permanent_address text,
-    institute_id uuid,
-    institute_verified boolean,
+    recruiter_id uuid,
+    recruiter_verified boolean,
     university_prn text,
     course_name text,
     passout_year smallint,
@@ -712,7 +712,7 @@ CREATE TABLE public.candidate_profiles (
     portfolio_links text[],
     created_at timestamp with time zone DEFAULT now() NOT NULL,
     updated_at timestamp with time zone DEFAULT now() NOT NULL,
-    profile_complete boolean GENERATED ALWAYS AS (((first_name IS NOT NULL) AND (TRIM(BOTH FROM first_name) <> ''::text) AND (middle_name IS NOT NULL) AND (TRIM(BOTH FROM middle_name) <> ''::text) AND (last_name IS NOT NULL) AND (TRIM(BOTH FROM last_name) <> ''::text) AND (phone_number IS NOT NULL) AND (date_of_birth IS NOT NULL) AND (gender IS NOT NULL) AND (institute_id IS NOT NULL) AND (course_name IS NOT NULL) AND (passout_year IS NOT NULL) AND (ssc_percentage IS NOT NULL))) STORED,
+    profile_complete boolean GENERATED ALWAYS AS (((first_name IS NOT NULL) AND (TRIM(BOTH FROM first_name) <> ''::text) AND (middle_name IS NOT NULL) AND (TRIM(BOTH FROM middle_name) <> ''::text) AND (last_name IS NOT NULL) AND (TRIM(BOTH FROM last_name) <> ''::text) AND (phone_number IS NOT NULL) AND (date_of_birth IS NOT NULL) AND (gender IS NOT NULL) AND (recruiter_id IS NOT NULL) AND (course_name IS NOT NULL) AND (passout_year IS NOT NULL) AND (ssc_percentage IS NOT NULL))) STORED,
     CONSTRAINT candidate_profiles_aadhaar_number_check CHECK ((aadhaar_number ~ '^[0-9]{12}$'::text)),
     CONSTRAINT candidate_profiles_cgpa_check CHECK ((cgpa <= (10)::numeric)),
     CONSTRAINT candidate_profiles_date_of_birth_check CHECK ((date_of_birth <= CURRENT_DATE)),
@@ -732,10 +732,10 @@ CREATE TABLE public.candidate_profiles (
     CONSTRAINT candidate_profiles_sgpa_sem9_check CHECK ((sgpa_sem9 <= (10)::numeric)),
     CONSTRAINT candidate_profiles_ssc_percentage_check CHECK ((ssc_percentage <= (100)::numeric))
 );
-CREATE TABLE public.institute_profiles (
+CREATE TABLE public.recruiter_profiles (
     profile_id uuid NOT NULL,
-    institute_name text NOT NULL,
-    institute_code text,
+    recruiter_name text NOT NULL,
+    recruiter_code text,
     established_year smallint,
     affiliation text,
     address text,
@@ -755,7 +755,7 @@ CREATE TABLE public.institute_profiles (
     created_at timestamp with time zone DEFAULT now() NOT NULL,
     updated_at timestamp with time zone DEFAULT now() NOT NULL,
     profile_updated boolean DEFAULT false NOT NULL,
-    profile_complete boolean GENERATED ALWAYS AS (((institute_name IS NOT NULL) AND (TRIM(BOTH FROM institute_name) <> ''::text) AND ((address IS NOT NULL) AND (TRIM(BOTH FROM address) <> ''::text)) AND ((city IS NOT NULL) AND (TRIM(BOTH FROM city) <> ''::text)) AND ((state IS NOT NULL) AND (TRIM(BOTH FROM state) <> ''::text)) AND ((phone_number IS NOT NULL) AND (TRIM(BOTH FROM phone_number) <> ''::text)) AND ((email IS NOT NULL) AND (TRIM(BOTH FROM email) <> ''::text)))) STORED
+    profile_complete boolean GENERATED ALWAYS AS (((recruiter_name IS NOT NULL) AND (TRIM(BOTH FROM recruiter_name) <> ''::text) AND ((address IS NOT NULL) AND (TRIM(BOTH FROM address) <> ''::text)) AND ((city IS NOT NULL) AND (TRIM(BOTH FROM city) <> ''::text)) AND ((state IS NOT NULL) AND (TRIM(BOTH FROM state) <> ''::text)) AND ((phone_number IS NOT NULL) AND (TRIM(BOTH FROM phone_number) <> ''::text)) AND ((email IS NOT NULL) AND (TRIM(BOTH FROM email) <> ''::text)))) STORED
 );
 CREATE TABLE public.options (
     id uuid DEFAULT gen_random_uuid() NOT NULL,
@@ -811,7 +811,7 @@ CREATE OR REPLACE VIEW public.tag_performance AS
   GROUP BY ta.student_id, ta.test_id, tg.id, tg.name;
 CREATE TABLE public.tests (
     id uuid DEFAULT gen_random_uuid() NOT NULL,
-    institute_id uuid NOT NULL,
+    recruiter_id uuid NOT NULL,
     title text NOT NULL,
     description text,
     instructions text,
@@ -883,8 +883,8 @@ CREATE OR REPLACE VIEW public.view_test_summary AS
  SELECT t.id,
     t.title,
     t.description,
-    t.institute_id,
-    ip.institute_name,
+    t.recruiter_id,
+    ip.recruiter_name,
     t.status,
     t.available_from,
     t.available_until,
@@ -906,15 +906,15 @@ CREATE OR REPLACE VIEW public.view_test_summary AS
            FROM public.test_attempts ta
           WHERE ((ta.test_id = t.id) AND (ta.status = 'submitted'::public.attempt_status))) AS avg_score_pct
    FROM (public.tests t
-     LEFT JOIN public.institute_profiles ip ON ((t.institute_id = ip.profile_id)));
+     LEFT JOIN public.recruiter_profiles ip ON ((t.recruiter_id = ip.profile_id)));
 ALTER TABLE ONLY public.attempt_answers
     ADD CONSTRAINT attempt_answers_attempt_id_question_id_key UNIQUE (attempt_id, question_id);
 ALTER TABLE ONLY public.attempt_answers
     ADD CONSTRAINT attempt_answers_pkey PRIMARY KEY (id);
 ALTER TABLE ONLY public.candidate_profiles
     ADD CONSTRAINT candidate_profiles_pkey PRIMARY KEY (profile_id);
-ALTER TABLE ONLY public.institute_profiles
-    ADD CONSTRAINT institute_profiles_pkey PRIMARY KEY (profile_id);
+ALTER TABLE ONLY public.recruiter_profiles
+    ADD CONSTRAINT recruiter_profiles_pkey PRIMARY KEY (profile_id);
 ALTER TABLE ONLY public.options
     ADD CONSTRAINT options_pkey PRIMARY KEY (id);
 ALTER TABLE ONLY public.options
@@ -951,15 +951,15 @@ CREATE INDEX idx_question_tags_tag_id ON public.question_tags USING btree (tag_i
 CREATE INDEX idx_questions_test_id ON public.questions USING btree (test_id);
 CREATE INDEX idx_questions_test_id_order ON public.questions USING btree (test_id, order_index);
 CREATE INDEX idx_test_attempts_student_test_status ON public.test_attempts USING btree (student_id, test_id, status);
-CREATE INDEX idx_tests_institute_id ON public.tests USING btree (institute_id);
+CREATE INDEX idx_tests_recruiter_id ON public.tests USING btree (recruiter_id);
 CREATE INDEX idx_tests_status ON public.tests USING btree (status);
 CREATE INDEX user_sessions_user_id_created_at_idx ON public.user_sessions USING btree (user_id, created_at DESC);
 CREATE OR REPLACE TRIGGER trg_attempt_answers_updated_at BEFORE UPDATE ON public.attempt_answers FOR EACH ROW EXECUTE FUNCTION extensions.moddatetime('updated_at');
 CREATE OR REPLACE TRIGGER trg_attempts_updated_at BEFORE UPDATE ON public.test_attempts FOR EACH ROW EXECUTE FUNCTION extensions.moddatetime('updated_at');
 CREATE OR REPLACE TRIGGER trg_candidate_profiles_sync AFTER INSERT OR UPDATE OF first_name, middle_name, last_name, profile_image_path ON public.candidate_profiles FOR EACH ROW EXECUTE FUNCTION public.sync_candidate_profile();
 CREATE OR REPLACE TRIGGER trg_candidate_profiles_updated_at BEFORE UPDATE ON public.candidate_profiles FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
-CREATE OR REPLACE TRIGGER trg_institute_profiles_sync AFTER INSERT OR UPDATE OF institute_name, logo_path ON public.institute_profiles FOR EACH ROW EXECUTE FUNCTION public.sync_institute_profile();
-CREATE OR REPLACE TRIGGER trg_institute_profiles_updated_at BEFORE UPDATE ON public.institute_profiles FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
+CREATE OR REPLACE TRIGGER trg_recruiter_profiles_sync AFTER INSERT OR UPDATE OF recruiter_name, logo_path ON public.recruiter_profiles FOR EACH ROW EXECUTE FUNCTION public.sync_recruiter_profile();
+CREATE OR REPLACE TRIGGER trg_recruiter_profiles_updated_at BEFORE UPDATE ON public.recruiter_profiles FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
 CREATE OR REPLACE TRIGGER trg_profiles_updated_at BEFORE UPDATE ON public.profiles FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
 CREATE OR REPLACE TRIGGER trg_questions_updated_at BEFORE UPDATE ON public.questions FOR EACH ROW EXECUTE FUNCTION extensions.moddatetime('updated_at');
 CREATE OR REPLACE TRIGGER trg_tests_updated_at BEFORE UPDATE ON public.tests FOR EACH ROW EXECUTE FUNCTION extensions.moddatetime('updated_at');
@@ -969,8 +969,8 @@ ALTER TABLE ONLY public.attempt_answers
     ADD CONSTRAINT attempt_answers_question_id_fkey FOREIGN KEY (question_id) REFERENCES public.questions(id) ON DELETE CASCADE;
 ALTER TABLE ONLY public.candidate_profiles
     ADD CONSTRAINT candidate_profiles_profile_id_fkey FOREIGN KEY (profile_id) REFERENCES public.profiles(id) ON DELETE CASCADE;
-ALTER TABLE ONLY public.institute_profiles
-    ADD CONSTRAINT institute_profiles_profile_id_fkey FOREIGN KEY (profile_id) REFERENCES public.profiles(id) ON DELETE CASCADE;
+ALTER TABLE ONLY public.recruiter_profiles
+    ADD CONSTRAINT recruiter_profiles_profile_id_fkey FOREIGN KEY (profile_id) REFERENCES public.profiles(id) ON DELETE CASCADE;
 ALTER TABLE ONLY public.options
     ADD CONSTRAINT options_question_id_fkey FOREIGN KEY (question_id) REFERENCES public.questions(id) ON DELETE CASCADE;
 ALTER TABLE ONLY public.profiles
@@ -986,53 +986,53 @@ ALTER TABLE ONLY public.test_attempts
 ALTER TABLE ONLY public.test_attempts
     ADD CONSTRAINT test_attempts_test_id_fkey FOREIGN KEY (test_id) REFERENCES public.tests(id) ON DELETE CASCADE;
 ALTER TABLE ONLY public.tests
-    ADD CONSTRAINT tests_institute_id_fkey FOREIGN KEY (institute_id) REFERENCES public.institute_profiles(profile_id) ON DELETE CASCADE;
+    ADD CONSTRAINT tests_recruiter_id_fkey FOREIGN KEY (recruiter_id) REFERENCES public.recruiter_profiles(profile_id) ON DELETE CASCADE;
 ALTER TABLE ONLY public.user_sessions
     ADD CONSTRAINT user_sessions_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.profiles(id) ON DELETE CASCADE;
-CREATE POLICY "Attempt answers are viewable by student and institute" ON public.attempt_answers FOR SELECT TO authenticated USING ((EXISTS ( SELECT 1
+CREATE POLICY "Attempt answers are viewable by student and recruiter" ON public.attempt_answers FOR SELECT TO authenticated USING ((EXISTS ( SELECT 1
    FROM public.test_attempts
   WHERE ((test_attempts.id = attempt_answers.attempt_id) AND ((test_attempts.student_id = ( SELECT auth.uid() AS uid)) OR (EXISTS ( SELECT 1
            FROM public.tests
-          WHERE ((tests.id = test_attempts.test_id) AND (tests.institute_id = ( SELECT auth.uid() AS uid))))))))));
+          WHERE ((tests.id = test_attempts.test_id) AND (tests.recruiter_id = ( SELECT auth.uid() AS uid))))))))));
 CREATE POLICY "Authenticated users can create tags" ON public.tags FOR INSERT TO authenticated WITH CHECK (true);
 CREATE POLICY "Candidate profiles are viewable by authenticated users" ON public.candidate_profiles FOR SELECT TO authenticated USING (true);
-CREATE POLICY "Institute profiles are viewable by authenticated users" ON public.institute_profiles FOR SELECT TO authenticated USING (true);
-CREATE POLICY "Institutes can delete their own tests" ON public.tests FOR DELETE TO authenticated USING ((institute_id = ( SELECT auth.uid() AS uid)));
-CREATE POLICY "Institutes can insert their own tests" ON public.tests FOR INSERT TO authenticated WITH CHECK ((institute_id = ( SELECT auth.uid() AS uid)));
-CREATE POLICY "Institutes can modify options for their tests_delete" ON public.options FOR DELETE TO authenticated USING ((EXISTS ( SELECT 1
+CREATE POLICY "Recruiter profiles are viewable by authenticated users" ON public.recruiter_profiles FOR SELECT TO authenticated USING (true);
+CREATE POLICY "Recruiters can delete their own tests" ON public.tests FOR DELETE TO authenticated USING ((recruiter_id = ( SELECT auth.uid() AS uid)));
+CREATE POLICY "Recruiters can insert their own tests" ON public.tests FOR INSERT TO authenticated WITH CHECK ((recruiter_id = ( SELECT auth.uid() AS uid)));
+CREATE POLICY "Recruiters can modify options for their tests_delete" ON public.options FOR DELETE TO authenticated USING ((EXISTS ( SELECT 1
    FROM (public.questions q
      JOIN public.tests t ON ((q.test_id = t.id)))
-  WHERE ((q.id = options.question_id) AND (t.institute_id = auth.uid())))));
-CREATE POLICY "Institutes can modify options for their tests_insert" ON public.options FOR INSERT TO authenticated WITH CHECK ((EXISTS ( SELECT 1
+  WHERE ((q.id = options.question_id) AND (t.recruiter_id = auth.uid())))));
+CREATE POLICY "Recruiters can modify options for their tests_insert" ON public.options FOR INSERT TO authenticated WITH CHECK ((EXISTS ( SELECT 1
    FROM (public.questions q
      JOIN public.tests t ON ((q.test_id = t.id)))
-  WHERE ((q.id = options.question_id) AND (t.institute_id = auth.uid())))));
-CREATE POLICY "Institutes can modify options for their tests_update" ON public.options FOR UPDATE TO authenticated USING ((EXISTS ( SELECT 1
+  WHERE ((q.id = options.question_id) AND (t.recruiter_id = auth.uid())))));
+CREATE POLICY "Recruiters can modify options for their tests_update" ON public.options FOR UPDATE TO authenticated USING ((EXISTS ( SELECT 1
    FROM (public.questions q
      JOIN public.tests t ON ((q.test_id = t.id)))
-  WHERE ((q.id = options.question_id) AND (t.institute_id = auth.uid())))));
-CREATE POLICY "Institutes can modify question tags for their tests_delete" ON public.question_tags FOR DELETE TO authenticated USING ((EXISTS ( SELECT 1
+  WHERE ((q.id = options.question_id) AND (t.recruiter_id = auth.uid())))));
+CREATE POLICY "Recruiters can modify question tags for their tests_delete" ON public.question_tags FOR DELETE TO authenticated USING ((EXISTS ( SELECT 1
    FROM (public.questions q
      JOIN public.tests t ON ((q.test_id = t.id)))
-  WHERE ((q.id = question_tags.question_id) AND (t.institute_id = auth.uid())))));
-CREATE POLICY "Institutes can modify question tags for their tests_insert" ON public.question_tags FOR INSERT TO authenticated WITH CHECK ((EXISTS ( SELECT 1
+  WHERE ((q.id = question_tags.question_id) AND (t.recruiter_id = auth.uid())))));
+CREATE POLICY "Recruiters can modify question tags for their tests_insert" ON public.question_tags FOR INSERT TO authenticated WITH CHECK ((EXISTS ( SELECT 1
    FROM (public.questions q
      JOIN public.tests t ON ((q.test_id = t.id)))
-  WHERE ((q.id = question_tags.question_id) AND (t.institute_id = auth.uid())))));
-CREATE POLICY "Institutes can modify question tags for their tests_update" ON public.question_tags FOR UPDATE TO authenticated USING ((EXISTS ( SELECT 1
+  WHERE ((q.id = question_tags.question_id) AND (t.recruiter_id = auth.uid())))));
+CREATE POLICY "Recruiters can modify question tags for their tests_update" ON public.question_tags FOR UPDATE TO authenticated USING ((EXISTS ( SELECT 1
    FROM (public.questions q
      JOIN public.tests t ON ((q.test_id = t.id)))
-  WHERE ((q.id = question_tags.question_id) AND (t.institute_id = auth.uid())))));
-CREATE POLICY "Institutes can modify questions for their tests_delete" ON public.questions FOR DELETE TO authenticated USING ((EXISTS ( SELECT 1
+  WHERE ((q.id = question_tags.question_id) AND (t.recruiter_id = auth.uid())))));
+CREATE POLICY "Recruiters can modify questions for their tests_delete" ON public.questions FOR DELETE TO authenticated USING ((EXISTS ( SELECT 1
    FROM public.tests
-  WHERE ((tests.id = questions.test_id) AND (tests.institute_id = auth.uid())))));
-CREATE POLICY "Institutes can modify questions for their tests_insert" ON public.questions FOR INSERT TO authenticated WITH CHECK ((EXISTS ( SELECT 1
+  WHERE ((tests.id = questions.test_id) AND (tests.recruiter_id = auth.uid())))));
+CREATE POLICY "Recruiters can modify questions for their tests_insert" ON public.questions FOR INSERT TO authenticated WITH CHECK ((EXISTS ( SELECT 1
    FROM public.tests
-  WHERE ((tests.id = questions.test_id) AND (tests.institute_id = auth.uid())))));
-CREATE POLICY "Institutes can modify questions for their tests_update" ON public.questions FOR UPDATE TO authenticated USING ((EXISTS ( SELECT 1
+  WHERE ((tests.id = questions.test_id) AND (tests.recruiter_id = auth.uid())))));
+CREATE POLICY "Recruiters can modify questions for their tests_update" ON public.questions FOR UPDATE TO authenticated USING ((EXISTS ( SELECT 1
    FROM public.tests
-  WHERE ((tests.id = questions.test_id) AND (tests.institute_id = auth.uid())))));
-CREATE POLICY "Institutes can update their own tests" ON public.tests FOR UPDATE TO authenticated USING ((institute_id = ( SELECT auth.uid() AS uid))) WITH CHECK ((institute_id = ( SELECT auth.uid() AS uid)));
+  WHERE ((tests.id = questions.test_id) AND (tests.recruiter_id = auth.uid())))));
+CREATE POLICY "Recruiters can update their own tests" ON public.tests FOR UPDATE TO authenticated USING ((recruiter_id = ( SELECT auth.uid() AS uid))) WITH CHECK ((recruiter_id = ( SELECT auth.uid() AS uid)));
 CREATE POLICY "Options are viewable by authenticated users" ON public.options FOR SELECT TO authenticated USING (true);
 CREATE POLICY "Profiles are viewable by all authenticated users" ON public.profiles FOR SELECT TO authenticated USING (true);
 CREATE POLICY "Question tags are viewable by authenticated users" ON public.question_tags FOR SELECT TO authenticated USING (true);
@@ -1048,24 +1048,24 @@ CREATE POLICY "Students can update their own attempt answers" ON public.attempt_
   WHERE ((test_attempts.id = attempt_answers.attempt_id) AND (test_attempts.student_id = ( SELECT auth.uid() AS uid))))));
 CREATE POLICY "Students can update their own test attempts" ON public.test_attempts FOR UPDATE TO authenticated USING ((student_id = ( SELECT auth.uid() AS uid))) WITH CHECK ((student_id = ( SELECT auth.uid() AS uid)));
 CREATE POLICY "Tags are viewable by authenticated users" ON public.tags FOR SELECT TO authenticated USING (true);
-CREATE POLICY "Test attempts are viewable by student and institute" ON public.test_attempts FOR SELECT TO authenticated USING (((student_id = ( SELECT auth.uid() AS uid)) OR (EXISTS ( SELECT 1
+CREATE POLICY "Test attempts are viewable by student and recruiter" ON public.test_attempts FOR SELECT TO authenticated USING (((student_id = ( SELECT auth.uid() AS uid)) OR (EXISTS ( SELECT 1
    FROM public.tests
-  WHERE ((tests.id = test_attempts.test_id) AND (tests.institute_id = ( SELECT auth.uid() AS uid)))))));
+  WHERE ((tests.id = test_attempts.test_id) AND (tests.recruiter_id = ( SELECT auth.uid() AS uid)))))));
 CREATE POLICY "Tests are viewable by authenticated users" ON public.tests FOR SELECT TO authenticated USING (true);
 CREATE POLICY "Users can delete their own candidate profile" ON public.candidate_profiles FOR DELETE TO authenticated USING ((profile_id = ( SELECT auth.uid() AS uid)));
-CREATE POLICY "Users can delete their own institute profile" ON public.institute_profiles FOR DELETE TO authenticated USING ((profile_id = ( SELECT auth.uid() AS uid)));
+CREATE POLICY "Users can delete their own recruiter profile" ON public.recruiter_profiles FOR DELETE TO authenticated USING ((profile_id = ( SELECT auth.uid() AS uid)));
 CREATE POLICY "Users can delete their own profile" ON public.profiles FOR DELETE TO authenticated USING ((id = ( SELECT auth.uid() AS uid)));
 CREATE POLICY "Users can delete their own sessions" ON public.user_sessions FOR DELETE USING ((( SELECT auth.uid() AS uid) = user_id));
 CREATE POLICY "Users can insert their own candidate profile" ON public.candidate_profiles FOR INSERT TO authenticated WITH CHECK ((profile_id = ( SELECT auth.uid() AS uid)));
-CREATE POLICY "Users can insert their own institute profile" ON public.institute_profiles FOR INSERT TO authenticated WITH CHECK ((profile_id = ( SELECT auth.uid() AS uid)));
+CREATE POLICY "Users can insert their own recruiter profile" ON public.recruiter_profiles FOR INSERT TO authenticated WITH CHECK ((profile_id = ( SELECT auth.uid() AS uid)));
 CREATE POLICY "Users can insert their own profile" ON public.profiles FOR INSERT TO authenticated WITH CHECK ((id = ( SELECT auth.uid() AS uid)));
 CREATE POLICY "Users can update their own candidate profile" ON public.candidate_profiles FOR UPDATE TO authenticated USING ((profile_id = ( SELECT auth.uid() AS uid))) WITH CHECK ((profile_id = ( SELECT auth.uid() AS uid)));
-CREATE POLICY "Users can update their own institute profile" ON public.institute_profiles FOR UPDATE TO authenticated USING ((profile_id = ( SELECT auth.uid() AS uid))) WITH CHECK ((profile_id = ( SELECT auth.uid() AS uid)));
+CREATE POLICY "Users can update their own recruiter profile" ON public.recruiter_profiles FOR UPDATE TO authenticated USING ((profile_id = ( SELECT auth.uid() AS uid))) WITH CHECK ((profile_id = ( SELECT auth.uid() AS uid)));
 CREATE POLICY "Users can update their own profile" ON public.profiles FOR UPDATE TO authenticated USING ((id = ( SELECT auth.uid() AS uid))) WITH CHECK ((id = ( SELECT auth.uid() AS uid)));
 CREATE POLICY "Users can view their own sessions" ON public.user_sessions FOR SELECT USING ((( SELECT auth.uid() AS uid) = user_id));
 ALTER TABLE public.attempt_answers ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.candidate_profiles ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.institute_profiles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.recruiter_profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.options ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.question_tags ENABLE ROW LEVEL SECURITY;
@@ -1086,10 +1086,10 @@ GRANT ALL ON FUNCTION public.get_candidate_home_stats(p_profile_id uuid) TO post
 GRANT ALL ON FUNCTION public.get_candidate_home_stats(p_profile_id uuid) TO anon;
 GRANT ALL ON FUNCTION public.get_candidate_home_stats(p_profile_id uuid) TO authenticated;
 GRANT ALL ON FUNCTION public.get_candidate_home_stats(p_profile_id uuid) TO service_role;
-GRANT ALL ON FUNCTION public.get_institute_home_stats(p_profile_id uuid) TO postgres;
-GRANT ALL ON FUNCTION public.get_institute_home_stats(p_profile_id uuid) TO anon;
-GRANT ALL ON FUNCTION public.get_institute_home_stats(p_profile_id uuid) TO authenticated;
-GRANT ALL ON FUNCTION public.get_institute_home_stats(p_profile_id uuid) TO service_role;
+GRANT ALL ON FUNCTION public.get_recruiter_home_stats(p_profile_id uuid) TO postgres;
+GRANT ALL ON FUNCTION public.get_recruiter_home_stats(p_profile_id uuid) TO anon;
+GRANT ALL ON FUNCTION public.get_recruiter_home_stats(p_profile_id uuid) TO authenticated;
+GRANT ALL ON FUNCTION public.get_recruiter_home_stats(p_profile_id uuid) TO service_role;
 GRANT ALL ON FUNCTION public.grade_attempt(p_attempt_id uuid) TO postgres;
 GRANT ALL ON FUNCTION public.grade_attempt(p_attempt_id uuid) TO anon;
 GRANT ALL ON FUNCTION public.grade_attempt(p_attempt_id uuid) TO authenticated;
@@ -1130,9 +1130,9 @@ GRANT ALL ON FUNCTION public.set_updated_at() TO service_role;
 GRANT ALL ON FUNCTION public.sync_candidate_profile() TO anon;
 GRANT ALL ON FUNCTION public.sync_candidate_profile() TO authenticated;
 GRANT ALL ON FUNCTION public.sync_candidate_profile() TO service_role;
-GRANT ALL ON FUNCTION public.sync_institute_profile() TO anon;
-GRANT ALL ON FUNCTION public.sync_institute_profile() TO authenticated;
-GRANT ALL ON FUNCTION public.sync_institute_profile() TO service_role;
+GRANT ALL ON FUNCTION public.sync_recruiter_profile() TO anon;
+GRANT ALL ON FUNCTION public.sync_recruiter_profile() TO authenticated;
+GRANT ALL ON FUNCTION public.sync_recruiter_profile() TO service_role;
 GRANT ALL ON FUNCTION public.sync_user_session() TO anon;
 GRANT ALL ON FUNCTION public.sync_user_session() TO authenticated;
 GRANT ALL ON FUNCTION public.sync_user_session() TO service_role;
@@ -1151,9 +1151,9 @@ GRANT ALL ON TABLE public.attempt_details TO service_role;
 GRANT ALL ON TABLE public.candidate_profiles TO anon;
 GRANT ALL ON TABLE public.candidate_profiles TO authenticated;
 GRANT ALL ON TABLE public.candidate_profiles TO service_role;
-GRANT ALL ON TABLE public.institute_profiles TO anon;
-GRANT ALL ON TABLE public.institute_profiles TO authenticated;
-GRANT ALL ON TABLE public.institute_profiles TO service_role;
+GRANT ALL ON TABLE public.recruiter_profiles TO anon;
+GRANT ALL ON TABLE public.recruiter_profiles TO authenticated;
+GRANT ALL ON TABLE public.recruiter_profiles TO service_role;
 GRANT ALL ON TABLE public.options TO anon;
 GRANT ALL ON TABLE public.options TO authenticated;
 GRANT ALL ON TABLE public.options TO service_role;

@@ -60,9 +60,9 @@ export default function TestsLoading() {
 
       {/* ── Page Header ──────────────────────────────────────────────────────── */}
       {/*
-        Institute → flex justify-between: [title + subtitle] | [Create Test button]
+        Recruiter → flex justify-between: [title + subtitle] | [Create Test button]
         Candidate → just [title + subtitle]  (no button)
-        We always render the button skeleton — harmless on candidate, correct on institute.
+        We always render the button skeleton — harmless on candidate, correct on recruiter.
       */}
       <div className="px-4 pt-8 pb-0 md:px-8">
         <div className="flex items-center justify-between gap-4">
@@ -70,7 +70,7 @@ export default function TestsLoading() {
             <Skeleton className="h-6 w-20" />
             <Skeleton className="h-4 w-36" />
           </div>
-          {/* Institute "Create Test" button */}
+          {/* Recruiter "Create Test" button */}
           <Skeleton className="h-8 w-28 rounded-md shrink-0" />
         </div>
       </div>
@@ -84,10 +84,10 @@ export default function TestsLoading() {
                 {label}
                 <span> {count badge} </span>   ← optional pill next to label
 
-        Institute tabs : All | Live | Upcoming | Past | Drafts  (5 tabs)
+        Recruiter tabs : All | Live | Upcoming | Past | Drafts  (5 tabs)
         Candidate tabs : Live | Upcoming | Past                  (3 tabs)
 
-        Use 5 pills to cover the institute layout (worst case).
+        Use 5 pills to cover the recruiter layout (worst case).
         Each pill width = label text width + optional count badge at text-xs px-3.
         Approximate real rendered widths:
           "All"      px-3 → ~44px   + badge ~20px → ~72px total

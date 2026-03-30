@@ -12,6 +12,8 @@ import {
   Users,
   ListCheck,
   PenLine,
+  Briefcase,
+  FileText,
 } from "lucide-react";
 
 
@@ -27,7 +29,7 @@ interface CandidateStatsResponse {
   };
 }
 
-interface InstituteStatsResponse {
+interface RecruiterStatsResponse {
   profile: any;
   stats: {
     total_tests: number;
@@ -153,7 +155,7 @@ export default async function HomePage() {
           )}
 
           {/* ── Test Stats ───────────────────────────────────────────────── */}
-          {cp?.institute_id && stats && (
+          {cp?.recruiter_id && stats && (
             <div className="space-y-3">
               <SectionHeader title="Tests Overview" href="/~/tests" />
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -184,8 +186,8 @@ export default async function HomePage() {
             </div>
           )}
 
-          {/* ── View Tests CTA (when profile ready but no institute) ─────── */}
-          {profileReady && !cp?.institute_id && (
+          {/* ── View Tests CTA (when profile ready but no recruiter) ─────── */}
+          {profileReady && !cp?.recruiter_id && (
             <div className="rounded-lg border bg-card p-4 flex items-center justify-between gap-4">
               <div className="space-y-0.5">
                 <p className="text-sm font-medium">Looking for tests?</p>
@@ -206,22 +208,27 @@ export default async function HomePage() {
     );
   }
 
-  // ── Institute ──────────────────────────────────────────────────────────────
-  if (profile.account_type === "institute") {
-    const { data } = await supabase.rpc("get_institute_home_stats", {
+  // ── Recruiter ──────────────────────────────────────────────────────────────
+  if (profile.account_type === "recruiter") {
+    const { data } = await supabase.rpc("get_recruiter_home_stats", {
       p_profile_id: profile.id,
     });
 
-    const instituteData = data as unknown as InstituteStatsResponse;
-    const ip = instituteData?.profile;
-    const stats = instituteData?.stats;
+    const [{ count: opportunitiesCount }, { count: applicationsCount }] = await Promise.all([
+      supabase.from("opportunities").select("*", { count: "exact", head: true }).eq("recruiter_id", profile.id),
+      supabase.from("applications").select(`*, opportunities!inner(*)`, { count: "exact", head: true }).eq("opportunities.recruiter_id", profile.id)
+    ]);
+
+    const recruiterData = data as unknown as RecruiterStatsResponse;
+    const ip = recruiterData?.profile;
+    const stats = recruiterData?.stats;
 
     const isComplete = ip?.profile_complete === true;
     const hasBeenSaved = ip?.profile_updated === true;
     const profileReady = isComplete && hasBeenSaved;
 
     const profileSubtitle = !ip
-      ? "You haven't set up your institution profile yet. Add your details to get started."
+      ? "You haven't set up your company profile yet. Add your details to get started."
       : !hasBeenSaved
       ? "Your profile has been started but not saved yet."
       : "A few required fields are still missing.";
@@ -242,7 +249,7 @@ export default async function HomePage() {
           {!profileReady && (
             <div className="rounded-lg border bg-card p-4 flex items-start justify-between gap-4">
               <div className="space-y-0.5">
-                <p className="text-sm font-medium">Your institution profile isn't complete yet</p>
+                <p className="text-sm font-medium">Your company profile isn't complete yet</p>
                 <p className="text-xs text-muted-foreground">{profileSubtitle}</p>
               </div>
               <Link href="/~/settings" className="shrink-0">
@@ -253,11 +260,35 @@ export default async function HomePage() {
               </Link>
             </div>
           )}
+          
+          {/* ── Hiring Pipeline Stats ───────────────────────────────────────────────── */}
+          <div className="space-y-3">
+            <SectionHeader title="Hiring Pipeline" href="/~/postings" />
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+              <StatCard
+                icon={<Briefcase className="h-4 w-4" />}
+                label="Job Postings"
+                value={opportunitiesCount || 0}
+              />
+              <StatCard
+                icon={<FileText className="h-4 w-4" />}
+                label="Applications Total"
+                value={applicationsCount || 0}
+                accent={(applicationsCount && applicationsCount > 0) ? "green" : "muted"}
+              />
+              <StatCard
+                icon={<Users className="h-4 w-4" />}
+                label="Test Attempts"
+                value={stats?.total_attempts || 0}
+                accent={(stats?.total_attempts && stats.total_attempts > 0) ? "blue" : "muted"}
+              />
+            </div>
+          </div>
 
           {/* ── Test Stats ───────────────────────────────────────────────── */}
           {stats && (
             <div className="space-y-3">
-              <SectionHeader title="Tests Overview" href="/~/tests" />
+              <SectionHeader title="Assessments Overview" href="/~/tests" />
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
                 <StatCard
                   icon={<ListCheck className="h-4 w-4" />}

@@ -3,7 +3,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 export type DerivedCandidateStatus = "live" | "upcoming" | "past"
-export type DerivedInstituteStatus = "draft" | "live" | "upcoming" | "past"
+export type DerivedRecruiterStatus = "draft" | "live" | "upcoming" | "past"
 
 export interface CandidateTestAttempt {
   status: "in_progress" | "submitted"
@@ -25,14 +25,14 @@ export interface CandidateTest {
   attempt?: CandidateTestAttempt
 }
 
-export interface InstituteTest {
+export interface RecruiterTest {
   id: string
   title: string
   description?: string
   time_limit_seconds?: number        // undefined = no time limit
   available_from?: string
   available_until?: string
-  derived_status: DerivedInstituteStatus
+  derived_status: DerivedRecruiterStatus
   status: "draft" | "published"
   results_available: boolean
   question_count: number
@@ -54,7 +54,7 @@ export function deriveStatus(
   dbStatus: string,
   available_from?: string | null,
   available_until?: string | null
-): DerivedInstituteStatus {
+): DerivedRecruiterStatus {
   if (dbStatus === "draft") return "draft"
 
   const now   = new Date()

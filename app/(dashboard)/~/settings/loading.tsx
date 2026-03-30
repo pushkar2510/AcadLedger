@@ -68,7 +68,7 @@ export default function SettingsLoading() {
         <div className="inline-flex h-9 items-center gap-0.5 rounded-lg bg-muted p-1">
           {/*
             Candidate tabs: Account | Security | Billing | Notifications | Login History | Privacy
-            Institute tabs: Institution | Security | Notifications | Login History | Privacy
+            Recruiter tabs: Institution | Security | Notifications | Login History | Privacy
             Use natural-width pills sized to approximate real label text at text-xs px-3.
           */}
           <Skeleton className="h-7 w-[66px]  rounded-md shrink-0" />
@@ -114,7 +114,7 @@ export default function SettingsLoading() {
         <Card>
           <CardHead titleW="w-40" descW="w-56" />
           <CardBody>
-            {/* row 1 — 2-col (Institute) / 3-col (Candidate: first/mid/last) */}
+            {/* row 1 — 2-col (Recruiter) / 3-col (Candidate: first/mid/last) */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <Field />
               <Field />

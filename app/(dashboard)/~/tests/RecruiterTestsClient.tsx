@@ -1,7 +1,7 @@
 "use client"
 
 // ─────────────────────────────────────────────────────────────────────────────
-// app/~/tests/InstituteTestsClient.tsx
+// app/~/tests/RecruiterTestsClient.tsx
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { useState } from "react"
@@ -27,7 +27,7 @@ import {
   PenLine,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
-import type { InstituteTest, DerivedInstituteStatus } from "./_types"
+import type { RecruiterTest, DerivedRecruiterStatus } from "./_types"
 
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -60,7 +60,7 @@ export function formatDateTime(dt?: string): string {
 
 // ─── Status Badge ─────────────────────────────────────────────────────────────
 
-function StatusBadge({ status }: { status: DerivedInstituteStatus }) {
+function StatusBadge({ status }: { status: DerivedRecruiterStatus }) {
   switch (status) {
     case "live":
       return (
@@ -111,7 +111,7 @@ function StatPill({ icon, label }: { icon: React.ReactNode; label: string }) {
 
 // ─── Test Card ────────────────────────────────────────────────────────────────
 
-function TestCard({ test }: { test: InstituteTest }) {
+function TestCard({ test }: { test: RecruiterTest }) {
   return (
     <Card className="border">
       <CardHeader className="pb-3">
@@ -248,10 +248,10 @@ function EmptyState({ isFiltered, onCreate }: { isFiltered: boolean; onCreate: (
 // ─── Component ────────────────────────────────────────────────────────────────
 
 interface Props {
-  tests: InstituteTest[]
+  tests: RecruiterTest[]
 }
 
-export function InstituteTestsClient({ tests }: Props) {
+export function RecruiterTestsClient({ tests }: Props) {
   const [activeTab, setActiveTab] = useState<Tab>("all")
   const router = useRouter()
 
@@ -268,7 +268,7 @@ export function InstituteTestsClient({ tests }: Props) {
     { value: "drafts",   label: "Drafts",   icon: <PenLine       className="h-3.5 w-3.5" />, count: drafts.length   },
   ]
 
-  const tabTests: Record<Tab, InstituteTest[]> = { all: tests, live, upcoming, past, drafts }
+  const tabTests: Record<Tab, RecruiterTest[]> = { all: tests, live, upcoming, past, drafts }
 
   const handleCreate = () => router.push("tests/new/edit")
 

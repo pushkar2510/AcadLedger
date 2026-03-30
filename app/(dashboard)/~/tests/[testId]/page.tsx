@@ -4,7 +4,7 @@ import { notFound, redirect } from "next/navigation"
 import { createClient } from "@/lib/supabase/server"
 import { getUserProfile } from "@/lib/supabase/profile"
 import { CandidateTestDetailClient } from "./CandidateTestDetailClient"
-import { InstituteTestDetailClient } from "./InstituteTestDetailClient"
+import { RecruiterTestDetailClient } from "./RecruiterTestDetailClient"
 import {
   toggleResultsAction,
   togglePublishAction,
@@ -15,9 +15,9 @@ import type {
   CandidateAttemptDetail,
   CandidateAnswerDetail,
   CandidateOption,
-  InstituteTestDetail,
-  InstituteQuestion,
-  InstituteAttemptRow,
+  RecruiterTestDetail,
+  RecruiterQuestion,
+  RecruiterAttemptRow,
 } from "./_types"
 
 
@@ -30,21 +30,21 @@ async function fetchCandidateView(
 ): Promise<{ test: CandidateTestDetail; attempt: CandidateAttemptDetail | null }> {
   const supabase = await createClient()
 
-  // 1. Fetch user's institute profile and the test with its nested data in parallel.
+  // 1. Fetch user's recruiter profile and the test with its nested data in parallel.
   // This reduces 7-8 sequential/parallel calls to just 2 master calls.
   const [profileRes, testRes] = await Promise.all([
     supabase
       .from("candidate_profiles")
-      .select("institute_id, profile_complete, profile_updated")
+      .select("recruiter_id, profile_complete, profile_updated")
       .eq("profile_id", userId)
       .maybeSingle(),
     supabase
       .from("tests")
       .select(`
         id, title, description, instructions, time_limit_seconds, 
-        available_from, available_until, results_available, status, institute_id,
+        available_from, available_until, results_available, status, recruiter_id,
         shuffle_questions, shuffle_options,
-        institute:institute_profiles(institute_name),
+        recruiter:recruiter_profiles(recruiter_name),
         questions (
           id, question_text, marks, explanation, order_index,
           options (id, option_text, is_correct, order_index),
@@ -69,7 +69,7 @@ async function fetchCandidateView(
   const candidateProfile = profileRes.data
   const raw = testRes.data
 
-  if (!candidateProfile?.institute_id || !raw || raw.status !== "published" || raw.institute_id !== candidateProfile.institute_id) {
+  if (!candidateProfile?.recruiter_id || !raw || raw.status !== "published" || raw.recruiter_id !== candidateProfile.recruiter_id) {
     notFound()
   }
 
@@ -84,7 +84,7 @@ async function fetchCandidateView(
     results_available: raw.results_available,
     shuffle_questions: raw.shuffle_questions,
     shuffle_options: raw.shuffle_options,
-    institute_name: (raw.institute as any)?.institute_name ?? null,
+    recruiter_name: (raw.recruiter as any)?.recruiter_name ?? null,
     questions: (raw.questions ?? []).map((q: any) => ({ marks: q.marks })),
   }
 
@@ -141,23 +141,23 @@ async function fetchCandidateView(
 
 
 
-// ─── Institute data ───────────────────────────────────────────────────────────
+// ─── Recruiter data ───────────────────────────────────────────────────────────
 
 
-async function fetchInstituteView(
+async function fetchRecruiterView(
   testId: string,
   userId: string
-): Promise<InstituteTestDetail> {
+): Promise<RecruiterTestDetail> {
   const supabase = await createClient()
 
-  // 1. Unified Institute View Query
+  // 1. Unified Recruiter View Query
   // Combines core test data, questions, and baseline attempt info.
   const { data: raw, error } = await supabase
     .from("tests")
     .select(`
       id, title, description, instructions, time_limit_seconds, 
-      available_from, available_until, status, results_available, institute_id,
-      institute:institute_profiles(institute_name),
+      available_from, available_until, status, results_available, recruiter_id,
+      recruiter:recruiter_profiles(recruiter_name),
       questions (
         id, question_text, question_type, marks, order_index, explanation, 
         options (id, option_text, is_correct, order_index),
@@ -170,13 +170,13 @@ async function fetchInstituteView(
       )
     `)
     .eq("id", testId)
-    .eq("institute_id", userId)
+    .eq("recruiter_id", userId)
     .order("started_at", { foreignTable: "view_test_results_detailed", ascending: false })
     .single()
 
   if (error || !raw) notFound()
 
-  const questions: InstituteQuestion[] = (raw.questions ?? []).map((q: any) => ({
+  const questions: RecruiterQuestion[] = (raw.questions ?? []).map((q: any) => ({
     id: q.id,
     question_text: q.question_text,
     question_type: q.question_type as "single_correct" | "multiple_correct",
@@ -196,7 +196,7 @@ async function fetchInstituteView(
   }))
 
   // 2. Map attempts
-  const attempts: InstituteAttemptRow[] = (raw.attempts ?? [])
+  const attempts: RecruiterAttemptRow[] = (raw.attempts ?? [])
     .filter((a: any): a is any & { attempt_id: string; started_at: string } =>
       a.attempt_id != null && a.started_at != null
     )
@@ -204,7 +204,7 @@ async function fetchInstituteView(
       id: a.attempt_id,
       student_name: a.student_name,
       student_email: a.student_email,
-      status: a.status as InstituteAttemptRow["status"],
+      status: a.status as RecruiterAttemptRow["status"],
       score: a.score ?? null,
       total_marks: a.total_marks ?? null,
       percentage: a.percentage ?? null,
@@ -226,7 +226,7 @@ async function fetchInstituteView(
     available_until: raw.available_until ?? null,
     status: raw.status as "draft" | "published" | "archived",
     results_available: raw.results_available,
-    institute_name: (raw.institute as any)?.institute_name ?? null,
+    recruiter_name: (raw.recruiter as any)?.recruiter_name ?? null,
     questions,
     attempts,
   }
@@ -257,10 +257,10 @@ export default async function TestDetailPage({
     return <CandidateTestDetailClient test={test} attempt={attempt} />
   }
 
-  if (profile.account_type === "institute") {
-    const test = await fetchInstituteView(testId, profile.id)
+  if (profile.account_type === "recruiter") {
+    const test = await fetchRecruiterView(testId, profile.id)
     return (
-      <InstituteTestDetailClient
+      <RecruiterTestDetailClient
         testId={testId}
         test={test}
         onToggleResults={toggleResultsAction.bind(null, testId)}

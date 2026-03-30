@@ -5,7 +5,7 @@ import { cache } from "react";
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
 
-export type AccountType = "candidate" | "institute" | "admin" | "recruiter";
+export type AccountType = "candidate" | "recruiter" | "admin";
 
 export interface UserProfile {
   id: string;

@@ -127,7 +127,7 @@ export async function loadTestAction(
       )
     `)
     .eq("id", testId)
-    .eq("institute_id", userId)
+    .eq("recruiter_id", userId)
     .single()
 
   if (!test) return null

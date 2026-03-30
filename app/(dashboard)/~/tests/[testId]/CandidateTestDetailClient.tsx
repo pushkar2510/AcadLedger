@@ -253,9 +253,9 @@ export function CandidateTestDetailClient({ test, attempt }: Props) {
 
           {/* ── Page Header ──────────────────────────────────────────────── */}
           <div className="space-y-1">
-            {test.institute_name && (
+            {test.recruiter_name && (
               <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
-                {test.institute_name}
+                {test.recruiter_name}
               </p>
             )}
             <h1 className="text-xl font-semibold leading-tight tracking-tight sm:text-2xl">
@@ -399,9 +399,9 @@ export function CandidateTestDetailClient({ test, attempt }: Props) {
 
         {/* ── Page Header ────────────────────────────────────────────────── */}
         <div className="space-y-1">
-          {test.institute_name && (
+          {test.recruiter_name && (
             <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
-              {test.institute_name}
+              {test.recruiter_name}
             </p>
           )}
           <h1 className="text-xl font-semibold leading-tight tracking-tight sm:text-2xl">

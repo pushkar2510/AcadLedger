@@ -113,17 +113,17 @@ BEGIN
     WHERE profile_id = p_profile_id;
 
     -- If profile exists, fetch counts
-    IF v_profile.profile_id IS NOT NULL AND v_profile.institute_id IS NOT NULL THEN
-        -- Total published tests for this institute
+    IF v_profile.profile_id IS NOT NULL AND v_profile.recruiter_id IS NOT NULL THEN
+        -- Total published tests for this recruiter
         SELECT count(*) INTO v_total_tests
         FROM public.tests
-        WHERE status = 'published' AND institute_id = v_profile.institute_id;
+        WHERE status = 'published' AND recruiter_id = v_profile.recruiter_id;
 
         -- Live tests
         SELECT count(*) INTO v_live_tests
         FROM public.tests
         WHERE status = 'published' 
-          AND institute_id = v_profile.institute_id
+          AND recruiter_id = v_profile.recruiter_id
           AND (available_from IS NULL OR available_from <= v_now)
           AND (available_until IS NULL OR available_until >= v_now);
 
@@ -131,7 +131,7 @@ BEGIN
         SELECT count(*) INTO v_upcoming_tests
         FROM public.tests
         WHERE status = 'published' 
-          AND institute_id = v_profile.institute_id
+          AND recruiter_id = v_profile.recruiter_id
           AND available_from > v_now;
 
         -- Completed attempts by this student
@@ -155,10 +155,10 @@ $$;
 
 
 --
--- Name: get_institute_home_stats(uuid); Type: FUNCTION; Schema: public; Owner: supabase_admin
+-- Name: get_recruiter_home_stats(uuid); Type: FUNCTION; Schema: public; Owner: supabase_admin
 --
 
-CREATE OR REPLACE FUNCTION public.get_institute_home_stats(p_profile_id uuid) RETURNS jsonb
+CREATE OR REPLACE FUNCTION public.get_recruiter_home_stats(p_profile_id uuid) RETURNS jsonb
     LANGUAGE plpgsql SECURITY DEFINER
     SET search_path TO 'public'
     AS $$
@@ -172,21 +172,21 @@ DECLARE
     v_draft_tests BIGINT := 0;
     v_total_attempts BIGINT := 0;
 BEGIN
-    -- Fetch the institute profile
+    -- Fetch the recruiter profile
     SELECT * INTO v_profile 
-    FROM public.institute_profiles 
+    FROM public.recruiter_profiles 
     WHERE profile_id = p_profile_id;
 
     -- Fetch counts
     -- Total tests
     SELECT count(*) INTO v_total_tests
     FROM public.tests
-    WHERE institute_id = p_profile_id;
+    WHERE recruiter_id = p_profile_id;
 
     -- Live tests
     SELECT count(*) INTO v_live_tests
     FROM public.tests
-    WHERE institute_id = p_profile_id 
+    WHERE recruiter_id = p_profile_id 
       AND status = 'published' 
       AND (available_from IS NULL OR available_from <= v_now)
       AND (available_until IS NULL OR available_until >= v_now);
@@ -194,28 +194,28 @@ BEGIN
     -- Upcoming tests
     SELECT count(*) INTO v_upcoming_tests
     FROM public.tests
-    WHERE institute_id = p_profile_id 
+    WHERE recruiter_id = p_profile_id 
       AND status = 'published'
       AND available_from > v_now;
 
     -- Past tests
     SELECT count(*) INTO v_past_tests
     FROM public.tests
-    WHERE institute_id = p_profile_id 
+    WHERE recruiter_id = p_profile_id 
       AND status = 'published'
       AND available_until < v_now;
 
     -- Draft tests
     SELECT count(*) INTO v_draft_tests
     FROM public.tests
-    WHERE institute_id = p_profile_id 
+    WHERE recruiter_id = p_profile_id 
       AND status = 'draft';
 
-    -- Total attempts for this institute
+    -- Total attempts for this recruiter
     SELECT count(*) INTO v_total_attempts
     FROM public.test_attempts ta
     JOIN public.tests t ON ta.test_id = t.id
-    WHERE t.institute_id = p_profile_id;
+    WHERE t.recruiter_id = p_profile_id;
 
     RETURN jsonb_build_object(
         'profile', (CASE WHEN v_profile.profile_id IS NOT NULL THEN row_to_json(v_profile) ELSE NULL END),
@@ -498,7 +498,7 @@ DECLARE
     v_saved_answers JSONB;
 BEGIN
     -- 1. Authorization & Profile Check
-    SELECT institute_id, profile_complete, profile_updated 
+    SELECT recruiter_id, profile_complete, profile_updated 
     INTO v_profile FROM public.candidate_profiles WHERE profile_id = v_user_id;
     
     IF v_profile IS NULL OR NOT COALESCE(v_profile.profile_complete, FALSE) OR NOT COALESCE(v_profile.profile_updated, FALSE) THEN
@@ -506,11 +506,11 @@ BEGIN
     END IF;
 
     -- 2. Test Availability Check
-    SELECT id, status, institute_id, time_limit_seconds, max_attempts, title
+    SELECT id, status, recruiter_id, time_limit_seconds, max_attempts, title
     INTO v_test FROM public.tests WHERE id = p_test_id;
 
-    IF v_test IS NULL OR v_test.status != 'published' OR v_test.institute_id != v_profile.institute_id THEN
-        RETURN jsonb_build_object('error', 'Test not available or invalid institute');
+    IF v_test IS NULL OR v_test.status != 'published' OR v_test.recruiter_id != v_profile.recruiter_id THEN
+        RETURN jsonb_build_object('error', 'Test not available or invalid recruiter');
     END IF;
 
     -- 3. Check for existing in-progress attempt (Resume)
@@ -684,13 +684,13 @@ DECLARE
   v_opt_ids uuid[];
 BEGIN
   -- 1. Verify ownership or new test
-  IF EXISTS (SELECT 1 FROM public.tests WHERE id = p_test_id AND institute_id <> v_user_id) THEN
+  IF EXISTS (SELECT 1 FROM public.tests WHERE id = p_test_id AND recruiter_id <> v_user_id) THEN
     RAISE EXCEPTION 'Access denied';
   END IF;
 
   -- 2. Upsert Test (now includes shuffle_questions, shuffle_options, strict_mode)
   INSERT INTO public.tests (
-    id, institute_id, title, description, instructions, 
+    id, recruiter_id, title, description, instructions, 
     time_limit_seconds, available_from, available_until, status,
     shuffle_questions, shuffle_options, strict_mode
   ) VALUES (
@@ -843,10 +843,10 @@ $$;
 
 
 --
--- Name: sync_institute_profile(); Type: FUNCTION; Schema: public; Owner: postgres
+-- Name: sync_recruiter_profile(); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
-CREATE OR REPLACE FUNCTION public.sync_institute_profile() RETURNS trigger
+CREATE OR REPLACE FUNCTION public.sync_recruiter_profile() RETURNS trigger
     LANGUAGE plpgsql SECURITY DEFINER
     SET search_path TO 'public'
     AS $$
@@ -857,7 +857,7 @@ begin
 
   set
 
-    display_name = nullif(trim(new.institute_name), ''),
+    display_name = nullif(trim(new.recruiter_name), ''),
 
     avatar_path   = new.logo_path
 
@@ -965,7 +965,7 @@ CREATE TABLE public.profiles (
     is_active boolean DEFAULT true NOT NULL,
     created_at timestamp with time zone DEFAULT now() NOT NULL,
     updated_at timestamp with time zone DEFAULT now() NOT NULL,
-    CONSTRAINT profiles_account_type_check CHECK ((account_type = ANY (ARRAY['admin'::text, 'institute'::text, 'recruiter'::text, 'candidate'::text, 'tpo'::text]))),
+    CONSTRAINT profiles_account_type_check CHECK ((account_type = ANY (ARRAY['admin'::text, 'recruiter'::text, 'recruiter'::text, 'candidate'::text, 'tpo'::text]))),
     CONSTRAINT profiles_username_check CHECK ((username ~* '^[a-zA-Z0-9_]{3,20}$'::text))
 );
 

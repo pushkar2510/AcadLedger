@@ -1,3 +1,5 @@
+DROP SCHEMA public CASCADE;
+CREATE SCHEMA public;
 --
 -- PostgreSQL database dump
 --
@@ -2484,3 +2486,34 @@ ALTER DEFAULT PRIVILEGES FOR ROLE supabase_admin IN SCHEMA public GRANT ALL ON T
 -- PostgreSQL database dump complete
 --
 
+
+
+
+CREATE TABLE public.opportunities (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    recruiter_id uuid NOT NULL,
+    title text NOT NULL,
+    description text NOT NULL,
+    required_skills jsonb DEFAULT '[]'::jsonb NOT NULL,
+    associated_test_id uuid,
+    stipend text,
+    duration text,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    updated_at timestamp with time zone,
+    status public.test_status DEFAULT 'draft'::public.test_status NOT NULL,
+    CONSTRAINT opp_pkey PRIMARY KEY (id),
+    CONSTRAINT fk_recruiter
+      FOREIGN KEY(recruiter_id) 
+      REFERENCES public.recruiter_profiles(profile_id)
+      ON DELETE CASCADE
+);
+
+CREATE POLICY "Opportunities are readable by everyone" ON public.opportunities
+    FOR SELECT
+    USING (status = 'published');
+
+CREATE POLICY "Recruiters can modify own opportunities" ON public.opportunities
+    FOR ALL
+    USING (auth.uid() = recruiter_id);
+
+ALTER TABLE public.opportunities ENABLE ROW LEVEL SECURITY;

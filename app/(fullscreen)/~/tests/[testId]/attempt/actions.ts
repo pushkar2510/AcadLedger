@@ -21,12 +21,12 @@ export async function startAttemptAction(testId: string): Promise<AttemptInfo> {
   const [profileRes, testRes, existingRes, completedRes] = await Promise.all([
     supabase
       .from("candidate_profiles")
-      .select("institute_id, profile_complete, profile_updated")
+      .select("recruiter_id, profile_complete, profile_updated")
       .eq("profile_id", user.sub)
       .maybeSingle(),
     supabase
       .from("tests")
-      .select("status, institute_id, time_limit_seconds, max_attempts")
+      .select("status, recruiter_id, time_limit_seconds, max_attempts")
       .eq("id", testId)
       .single(),
     supabase
@@ -53,7 +53,7 @@ export async function startAttemptAction(testId: string): Promise<AttemptInfo> {
   if (!candidateProfile || !candidateProfile.profile_complete || !candidateProfile.profile_updated) {
     throw new Error("Profile is incomplete")
   }
-  if (!test || test.status !== "published" || test.institute_id !== candidateProfile.institute_id) {
+  if (!test || test.status !== "published" || test.recruiter_id !== candidateProfile.recruiter_id) {
     throw new Error("Test not available")
   }
 
@@ -107,7 +107,7 @@ export async function startAttemptAction(testId: string): Promise<AttemptInfo> {
 /**
  * Efficiently returns the Supabase client and user.
  * We rely on Postgres-level checks (RLS and the save_answer/grade_attempt RPCs)
- * for deep security (ownership, institute matching, status) rather than
+ * for deep security (ownership, recruiter matching, status) rather than
  * doing multiple expensive sequential queries here in the server action.
  */
 async function getSupabaseForAction() {

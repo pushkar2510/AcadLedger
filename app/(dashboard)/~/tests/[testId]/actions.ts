@@ -10,7 +10,7 @@ import { createClient } from "@/lib/supabase/server"
 
 
 // ─── Guard helper ─────────────────────────────────────────────────────────────
-// Verifies the authenticated user is the institute that owns the test.
+// Verifies the authenticated user is the recruiter that owns the test.
 
 async function assertOwner(testId: string): Promise<string> {
   const supabase = await createClient()
@@ -20,12 +20,12 @@ async function assertOwner(testId: string): Promise<string> {
 
   const { data: test, error } = await supabase
     .from("tests")
-    .select("institute_id")
+    .select("recruiter_id")
     .eq("id", testId)
     .single()
 
   if (error || !test) throw new Error("Test not found")
-  if (test.institute_id !== user.sub) throw new Error("Forbidden")
+  if (test.recruiter_id !== user.sub) throw new Error("Forbidden")
 
   return user.sub as string
 }

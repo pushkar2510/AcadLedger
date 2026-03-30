@@ -67,12 +67,12 @@ CREATE POLICY "Tags are viewable by authenticated users" ON public.tags FOR SELE
 
 
 --
--- Name: test_attempts Test attempts are viewable by student and institute; Type: POLICY; Schema: public; Owner: postgres
+-- Name: test_attempts Test attempts are viewable by student and recruiter; Type: POLICY; Schema: public; Owner: postgres
 --
 
-CREATE POLICY "Test attempts are viewable by student and institute" ON public.test_attempts FOR SELECT TO authenticated USING (((student_id = ( SELECT auth.uid() AS uid)) OR (EXISTS ( SELECT 1
+CREATE POLICY "Test attempts are viewable by student and recruiter" ON public.test_attempts FOR SELECT TO authenticated USING (((student_id = ( SELECT auth.uid() AS uid)) OR (EXISTS ( SELECT 1
    FROM public.tests
-  WHERE ((tests.id = test_attempts.test_id) AND (tests.institute_id = ( SELECT auth.uid() AS uid)))))));
+  WHERE ((tests.id = test_attempts.test_id) AND (tests.recruiter_id = ( SELECT auth.uid() AS uid)))))));
 
 
 --
@@ -90,10 +90,10 @@ CREATE POLICY "Users can delete their own candidate profile" ON public.candidate
 
 
 --
--- Name: institute_profiles Users can delete their own institute profile; Type: POLICY; Schema: public; Owner: postgres
+-- Name: recruiter_profiles Users can delete their own recruiter profile; Type: POLICY; Schema: public; Owner: postgres
 --
 
-CREATE POLICY "Users can delete their own institute profile" ON public.institute_profiles FOR DELETE TO authenticated USING ((profile_id = ( SELECT auth.uid() AS uid)));
+CREATE POLICY "Users can delete their own recruiter profile" ON public.recruiter_profiles FOR DELETE TO authenticated USING ((profile_id = ( SELECT auth.uid() AS uid)));
 
 
 --
@@ -118,10 +118,10 @@ CREATE POLICY "Users can insert their own candidate profile" ON public.candidate
 
 
 --
--- Name: institute_profiles Users can insert their own institute profile; Type: POLICY; Schema: public; Owner: postgres
+-- Name: recruiter_profiles Users can insert their own recruiter profile; Type: POLICY; Schema: public; Owner: postgres
 --
 
-CREATE POLICY "Users can insert their own institute profile" ON public.institute_profiles FOR INSERT TO authenticated WITH CHECK ((profile_id = ( SELECT auth.uid() AS uid)));
+CREATE POLICY "Users can insert their own recruiter profile" ON public.recruiter_profiles FOR INSERT TO authenticated WITH CHECK ((profile_id = ( SELECT auth.uid() AS uid)));
 
 
 --
@@ -139,10 +139,10 @@ CREATE POLICY "Users can update their own candidate profile" ON public.candidate
 
 
 --
--- Name: institute_profiles Users can update their own institute profile; Type: POLICY; Schema: public; Owner: postgres
+-- Name: recruiter_profiles Users can update their own recruiter profile; Type: POLICY; Schema: public; Owner: postgres
 --
 
-CREATE POLICY "Users can update their own institute profile" ON public.institute_profiles FOR UPDATE TO authenticated USING ((profile_id = ( SELECT auth.uid() AS uid))) WITH CHECK ((profile_id = ( SELECT auth.uid() AS uid)));
+CREATE POLICY "Users can update their own recruiter profile" ON public.recruiter_profiles FOR UPDATE TO authenticated USING ((profile_id = ( SELECT auth.uid() AS uid))) WITH CHECK ((profile_id = ( SELECT auth.uid() AS uid)));
 
 
 --
@@ -172,10 +172,10 @@ ALTER TABLE public.attempt_answers ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.candidate_profiles ENABLE ROW LEVEL SECURITY;
 
 --
--- Name: institute_profiles; Type: ROW SECURITY; Schema: public; Owner: postgres
+-- Name: recruiter_profiles; Type: ROW SECURITY; Schema: public; Owner: postgres
 --
 
-ALTER TABLE public.institute_profiles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.recruiter_profiles ENABLE ROW LEVEL SECURITY;
 
 --
 -- Name: options; Type: ROW SECURITY; Schema: public; Owner: postgres
@@ -256,13 +256,13 @@ GRANT ALL ON FUNCTION public.get_candidate_home_stats(p_profile_id uuid) TO serv
 
 
 --
--- Name: FUNCTION get_institute_home_stats(p_profile_id uuid); Type: ACL; Schema: public; Owner: supabase_admin
+-- Name: FUNCTION get_recruiter_home_stats(p_profile_id uuid); Type: ACL; Schema: public; Owner: supabase_admin
 --
 
-GRANT ALL ON FUNCTION public.get_institute_home_stats(p_profile_id uuid) TO postgres;
-GRANT ALL ON FUNCTION public.get_institute_home_stats(p_profile_id uuid) TO anon;
-GRANT ALL ON FUNCTION public.get_institute_home_stats(p_profile_id uuid) TO authenticated;
-GRANT ALL ON FUNCTION public.get_institute_home_stats(p_profile_id uuid) TO service_role;
+GRANT ALL ON FUNCTION public.get_recruiter_home_stats(p_profile_id uuid) TO postgres;
+GRANT ALL ON FUNCTION public.get_recruiter_home_stats(p_profile_id uuid) TO anon;
+GRANT ALL ON FUNCTION public.get_recruiter_home_stats(p_profile_id uuid) TO authenticated;
+GRANT ALL ON FUNCTION public.get_recruiter_home_stats(p_profile_id uuid) TO service_role;
 
 
 --
@@ -372,12 +372,12 @@ GRANT ALL ON FUNCTION public.sync_candidate_profile() TO service_role;
 
 
 --
--- Name: FUNCTION sync_institute_profile(); Type: ACL; Schema: public; Owner: postgres
+-- Name: FUNCTION sync_recruiter_profile(); Type: ACL; Schema: public; Owner: postgres
 --
 
-GRANT ALL ON FUNCTION public.sync_institute_profile() TO anon;
-GRANT ALL ON FUNCTION public.sync_institute_profile() TO authenticated;
-GRANT ALL ON FUNCTION public.sync_institute_profile() TO service_role;
+GRANT ALL ON FUNCTION public.sync_recruiter_profile() TO anon;
+GRANT ALL ON FUNCTION public.sync_recruiter_profile() TO authenticated;
+GRANT ALL ON FUNCTION public.sync_recruiter_profile() TO service_role;
 
 
 --
@@ -435,12 +435,12 @@ GRANT ALL ON TABLE public.candidate_profiles TO service_role;
 
 
 --
--- Name: TABLE institute_profiles; Type: ACL; Schema: public; Owner: postgres
+-- Name: TABLE recruiter_profiles; Type: ACL; Schema: public; Owner: postgres
 --
 
-GRANT ALL ON TABLE public.institute_profiles TO anon;
-GRANT ALL ON TABLE public.institute_profiles TO authenticated;
-GRANT ALL ON TABLE public.institute_profiles TO service_role;
+GRANT ALL ON TABLE public.recruiter_profiles TO anon;
+GRANT ALL ON TABLE public.recruiter_profiles TO authenticated;
+GRANT ALL ON TABLE public.recruiter_profiles TO service_role;
 
 
 --

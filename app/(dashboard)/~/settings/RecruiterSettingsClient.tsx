@@ -1,6 +1,6 @@
 "use client"
 
-// app/~/settings/InstituteSettingsClient.tsx
+// app/~/settings/RecruiterSettingsClient.tsx
 
 import { useState, useTransition, useEffect, useCallback, useRef } from "react"
 import { useRouter } from "next/navigation"
@@ -37,13 +37,27 @@ import { cn } from "@/lib/utils"
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
-const AFFILIATION_OPTIONS = [
-  "SPPU - Savitribai Phule Pune University",
-  "Mumbai University",
-  "AICTE - All India Council for Technical Education",
-  "UGC - University Grants Commission",
-  "Autonomous",
+const INDUSTRY_SECTOR_OPTIONS = [
+  "Technology",
+  "Finance & Banking",
+  "Healthcare",
+  "Education",
+  "Manufacturing",
+  "Consulting",
+  "E-Commerce",
+  "Media & Entertainment",
+  "Telecommunications",
+  "Government & Public Sector",
   "Other",
+]
+
+const COMPANY_SIZE_OPTIONS = [
+  "1-10 employees",
+  "11-50 employees",
+  "51-200 employees",
+  "201-500 employees",
+  "501-1000 employees",
+  "1000+ employees",
 ]
 
 const STATE_OPTIONS = [
@@ -210,10 +224,10 @@ function PasswordStrengthBar({ score }: { score: 0 | 1 | 2 | 3 | 4 }) {
 
 // ─── Tab config ───────────────────────────────────────────────────────────────
 
-type Tab = "institution" | "security" | "notifications" | "history" | "privacy"
+type Tab = "company" | "security" | "notifications" | "history" | "privacy"
 
 const TABS: { value: Tab; label: string }[] = [
-  { value: "institution", label: "Institution" },
+  { value: "company", label: "Company" },
   { value: "security", label: "Security" },
   { value: "notifications", label: "Notifications" },
   { value: "history", label: "Login History" },
@@ -247,13 +261,13 @@ function DeviceIcon({ device }: { device: "desktop" | "mobile" | "tablet" }) {
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
-export function InstituteSettingsClient({ userProfile, initialData }: Props) {
+export function RecruiterSettingsClient({ userProfile, initialData }: Props) {
   const supabase = createClient()
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [isPwPending, startPwTransition] = useTransition()
   const [isDirty, setIsDirty] = useState(false)
-  const [activeTab, setActiveTab] = useState<Tab>("institution")
+  const [activeTab, setActiveTab] = useState<Tab>("company")
 
   // ── Username ──────────────────────────────────────────────────────────────
   const [username, setUsername] = useState(userProfile.username ?? "")
@@ -269,27 +283,19 @@ export function InstituteSettingsClient({ userProfile, initialData }: Props) {
   const [isUploadingLogo, setIsUploadingLogo] = useState(false)
   const logoInputRef = useRef<HTMLInputElement>(null)
 
-  // ── Institute fields ──────────────────────────────────────────────────────
-  const [instituteName, setInstituteName] = useState(initialData?.institute_name ?? "")
-  const [instituteCode, setInstituteCode] = useState(initialData?.institute_code ?? "")
-  const [establishedYear, setEstablishedYear] = useState(
-    initialData?.established_year ? String(initialData.established_year) : ""
-  )
-  const [affiliation, setAffiliation] = useState(initialData?.affiliation ?? "")
+  // ── Recruiter fields ──────────────────────────────────────────────────────
+  const [companyName, setCompanyName] = useState(initialData?.company_name ?? "")
+  const [industrySector, setIndustrySector] = useState(initialData?.industry_sector ?? "")
+  const [companySize, setCompanySize] = useState(initialData?.company_size ?? "")
   const [address, setAddress] = useState(initialData?.address ?? "")
   const [city, setCity] = useState(initialData?.city ?? "")
   const [stateVal, setStateVal] = useState(initialData?.state ?? "")
   const [pincode, setPincode] = useState(initialData?.pincode ?? "")
   const [country, setCountry] = useState(initialData?.country ?? "India")
-  const [instPhone, setInstPhone] = useState(initialData?.phone_number ?? "")
-  const [instEmail, setInstEmail] = useState(initialData?.email ?? "")
+  const [companyPhone, setCompanyPhone] = useState(initialData?.phone_number ?? "")
+  const [companyEmail, setCompanyEmail] = useState(initialData?.email ?? "")
   const [websiteUrl, setWebsiteUrl] = useState(initialData?.website_url ?? "")
-  const [principalName, setPrincipalName] = useState(initialData?.principal_name ?? "")
-  const [principalEmail, setPrincipalEmail] = useState(initialData?.principal_email ?? "")
-  const [principalPhone, setPrincipalPhone] = useState(initialData?.principal_phone ?? "")
-  const [courses, setCourses] = useState<string[]>(
-    initialData?.courses?.length ? initialData.courses : [""]
-  )
+  const [companyWebsite, setCompanyWebsite] = useState(initialData?.company_website ?? "")
   const [socialLinks, setSocialLinks] = useState<string[]>(
     initialData?.social_links?.length ? initialData.social_links : [""]
   )
@@ -327,22 +333,18 @@ export function InstituteSettingsClient({ userProfile, initialData }: Props) {
     []
   )
 
-  const handleInstituteName = markDirty(setInstituteName)
-  const handleInstituteCode = markDirty(setInstituteCode)
-  const handleEstablishedYear = markDirty(setEstablishedYear)
-  const handleAffiliation = markDirty(setAffiliation)
+  const handleCompanyName = markDirty(setCompanyName)
+  const handleIndustrySector = markDirty(setIndustrySector)
+  const handleCompanySize = markDirty(setCompanySize)
   const handleAddress = markDirty(setAddress)
   const handleCity = markDirty(setCity)
   const handleStateVal = markDirty(setStateVal)
   const handlePincode = markDirty(setPincode)
   const handleCountry = markDirty(setCountry)
-  const handleInstPhone = markDirty(setInstPhone)
-  const handleInstEmail = markDirty(setInstEmail)
+  const handleCompanyPhone = markDirty(setCompanyPhone)
+  const handleCompanyEmail = markDirty(setCompanyEmail)
   const handleWebsiteUrl = markDirty(setWebsiteUrl)
-  const handlePrincipalName = markDirty(setPrincipalName)
-  const handlePrincipalEmail = markDirty(setPrincipalEmail)
-  const handlePrincipalPhone = markDirty(setPrincipalPhone)
-  const handleCourses = markDirty(setCourses)
+  const handleCompanyWebsite = markDirty(setCompanyWebsite)
   const handleSocialLinks = markDirty(setSocialLinks)
 
   // ── Username debounce ─────────────────────────────────────────────────────
@@ -403,13 +405,13 @@ export function InstituteSettingsClient({ userProfile, initialData }: Props) {
       }
       const ext = file.name.split(".").pop() ?? "jpg"
       const timestamp = Date.now()
-      const newPath = `institutes/${userProfile.id}/logo/${timestamp}.${ext}`
+      const newPath = `recruiters/${userProfile.id}/logo/${timestamp}.${ext}`
       const { error: uploadError } = await supabase.storage
         .from("avatars")
         .upload(newPath, file, { upsert: false, contentType: file.type })
       if (uploadError) throw uploadError
       const { error: dbError } = await supabase
-        .from("institute_profiles")
+        .from("recruiter_profiles")
         .update({ logo_path: newPath })
         .eq("profile_id", userProfile.id);
       if (dbError) throw dbError
@@ -433,18 +435,6 @@ export function InstituteSettingsClient({ userProfile, initialData }: Props) {
       setIsUploadingLogo(false)
       if (logoInputRef.current) logoInputRef.current.value = ""
     }
-  }
-
-  // ── Course management ─────────────────────────────────────────────────────
-
-  function addCourse() { handleCourses((prev) => [...prev, ""]) }
-
-  function handleCourseChange(index: number, value: string) {
-    handleCourses((prev) => { const u = [...prev]; u[index] = value; return u })
-  }
-
-  function removeCourse(index: number) {
-    handleCourses((prev) => prev.filter((_, i) => i !== index))
   }
 
   // ── Social links ──────────────────────────────────────────────────────────
@@ -589,21 +579,17 @@ export function InstituteSettingsClient({ userProfile, initialData }: Props) {
       e.username = "3–20 characters: letters, numbers, and underscores only."
     if (usernameStatus === "taken") e.username = "This username is already taken."
     if (usernameStatus === "checking") e.username = "Please wait for username availability check."
-    if (!instituteName.trim()) e.instituteName = "College name is required."
-    if (!affiliation) e.affiliation = "Affiliation is required."
+    if (!companyName.trim()) e.companyName = "Company name is required."
+    if (!industrySector) e.industrySector = "Industry sector is required."
     if (!address.trim()) e.address = "Address is required."
     if (!city.trim()) e.city = "City is required."
     if (!stateVal) e.state = "State is required."
     if (!pincode.trim()) e.pincode = "Pincode is required."
     else if (!/^[0-9]{6}$/.test(pincode)) e.pincode = "Must be exactly 6 digits."
     if (!country) e.country = "Country is required."
-    if (!instPhone.trim()) e.instPhone = "Contact number is required."
-    if (!instEmail.trim()) e.instEmail = "Email address is required."
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(instEmail)) e.instEmail = "Enter a valid email address."
-    if (!principalName.trim()) e.principalName = "Principal name is required."
-    if (!principalEmail.trim()) e.principalEmail = "Principal email is required."
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(principalEmail)) e.principalEmail = "Enter a valid email address."
-    if (!principalPhone.trim()) e.principalPhone = "Principal phone is required."
+    if (!companyPhone.trim()) e.companyPhone = "Contact number is required."
+    if (!companyEmail.trim()) e.companyEmail = "Email address is required."
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(companyEmail)) e.companyEmail = "Enter a valid email address."
     return e
   }
 
@@ -612,22 +598,18 @@ export function InstituteSettingsClient({ userProfile, initialData }: Props) {
   function handleDiscard() {
     setUsername(userProfile.username ?? "")
     setUsernameStatus("idle")
-    setInstituteName(initialData?.institute_name ?? "")
-    setInstituteCode(initialData?.institute_code ?? "")
-    setEstablishedYear(initialData?.established_year ? String(initialData.established_year) : "")
-    setAffiliation(initialData?.affiliation ?? "")
+    setCompanyName(initialData?.company_name ?? "")
+    setIndustrySector(initialData?.industry_sector ?? "")
+    setCompanySize(initialData?.company_size ?? "")
     setAddress(initialData?.address ?? "")
     setCity(initialData?.city ?? "")
     setStateVal(initialData?.state ?? "")
     setPincode(initialData?.pincode ?? "")
     setCountry(initialData?.country ?? "India")
-    setInstPhone(initialData?.phone_number ?? "")
-    setInstEmail(initialData?.email ?? "")
+    setCompanyPhone(initialData?.phone_number ?? "")
+    setCompanyEmail(initialData?.email ?? "")
     setWebsiteUrl(initialData?.website_url ?? "")
-    setPrincipalName(initialData?.principal_name ?? "")
-    setPrincipalEmail(initialData?.principal_email ?? "")
-    setPrincipalPhone(initialData?.principal_phone ?? "")
-    setCourses(initialData?.courses?.length ? initialData.courses : [""])
+    setCompanyWebsite(initialData?.company_website ?? "")
     setSocialLinks(initialData?.social_links?.length ? initialData.social_links : [""])
     setErrors({})
     setIsDirty(false)
@@ -664,40 +646,36 @@ export function InstituteSettingsClient({ userProfile, initialData }: Props) {
         }
       }
 
-      // 2. Prepare payload for `institute_profiles`
+      // 2. Prepare payload for `recruiter_profiles`
       const payload = {
         profile_id: userProfile.id,
-        institute_name: instituteName.trim() || null,
-        institute_code: instituteCode.trim() || null,
-        established_year: establishedYear ? Number(establishedYear) : null,
-        affiliation: affiliation || null,
+        company_name: companyName.trim() || null,
+        industry_sector: industrySector || null,
+        company_size: companySize || null,
         address: address.trim() || null,
         city: city.trim() || null,
         state: stateVal || null,
         pincode: pincode.trim() || null,
         country: country || null,
-        phone_number: instPhone.trim() || null,
-        email: instEmail.trim() || null,
+        phone_number: companyPhone.trim() || null,
+        email: companyEmail.trim() || null,
         website_url: websiteUrl.trim() || null,
-        principal_name: principalName.trim() || null,
-        principal_email: principalEmail.trim() || null,
-        principal_phone: principalPhone.trim() || null,
-        courses: courses.filter((c) => c.trim()),
+        company_website: companyWebsite.trim() || null,
         social_links: socialLinks.filter((l) => l.trim()),
         profile_updated: true,
       }
 
-      // 3. Save Institute Profile (Bypass ON CONFLICT errors)
+      // 3. Save Recruiter Profile (Bypass ON CONFLICT errors)
       const { error } = initialData
-        ? await supabase.from("institute_profiles").update(payload).eq("profile_id", userProfile.id)
-        : await supabase.from("institute_profiles").insert(payload)
+        ? await supabase.from("recruiter_profiles").update(payload).eq("profile_id", userProfile.id)
+        : await supabase.from("recruiter_profiles").insert(payload)
 
       if (error) {
         console.error("Supabase Save Error:", error)
         toast.error(error.message || "Failed to save profile. Please try again.")
       } else {
         // Sync with global profiles table and Auth metadata
-        const newDisplayName = instituteName.trim() || userProfile.display_name
+        const newDisplayName = companyName.trim() || userProfile.display_name
 
         await supabase.from("profiles").update({ 
           display_name: newDisplayName,
@@ -757,15 +735,15 @@ export function InstituteSettingsClient({ userProfile, initialData }: Props) {
         <div className="px-4 py-6 md:px-8 md:py-8">
 
           {/* ══════════════════════════════════════════════════════════
-              INSTITUTION TAB
+              COMPANY TAB
           ══════════════════════════════════════════════════════════ */}
-          <TabsContent value="institution" className="space-y-6 mt-0">
+          <TabsContent value="company" className="space-y-6 mt-0">
 
             {/* Account Settings (Username) */}
             <Card>
               <CardHeader>
                 <CardTitle>Account Settings</CardTitle>
-                <CardDescription>Your unique username identifies your institution on the platform</CardDescription>
+                <CardDescription>Your unique username identifies your company on the platform</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="max-w-sm space-y-2">
@@ -818,14 +796,14 @@ export function InstituteSettingsClient({ userProfile, initialData }: Props) {
                     <Avatar className="h-20 w-20">
                       <AvatarImage src={logoSrc ?? undefined} alt="Institution logo" className="object-cover" />
                       <AvatarFallback className="text-xl font-semibold">
-                        {instituteName ? instituteName[0].toUpperCase() : "?"}
+                        {companyName ? companyName[0].toUpperCase() : "?"}
                       </AvatarFallback>
                     </Avatar>
                     <button
                       type="button"
                       onClick={() => logoInputRef.current?.click()}
                       disabled={isUploadingLogo}
-                      aria-label="Change institution logo"
+                      aria-label="Change company logo"
                       className="absolute -bottom-1 -right-1 h-7 w-7 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-md hover:bg-primary/90 disabled:opacity-50 transition-colors"
                     >
                       {isUploadingLogo
@@ -847,9 +825,9 @@ export function InstituteSettingsClient({ userProfile, initialData }: Props) {
                         : <><Upload className="h-4 w-4 mr-2" />Upload Logo</>}
                     </Button>
                     <p className="text-xs text-muted-foreground">Square image recommended · max 2 MB</p>
-                    {!initialData?.institute_name && (
+                    {!initialData?.company_name && (
                       <p className="text-xs text-amber-600 dark:text-amber-400">
-                        Save institution details first, then upload the logo.
+                        Save company details first, then upload the logo.
                       </p>
                     )}
                   </div>
@@ -861,56 +839,51 @@ export function InstituteSettingsClient({ userProfile, initialData }: Props) {
             <Card>
               <CardHeader>
                 <CardTitle>Basic Information</CardTitle>
-                <CardDescription>Essential details about your institution</CardDescription>
+                <CardDescription>Essential details about your company</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label>College Name<RequiredMark /></Label>
+                    <Label>Company Name<RequiredMark /></Label>
                     <Input
-                      placeholder="Enter college name"
-                      value={instituteName}
-                      onChange={(e) => handleInstituteName(e.target.value)}
+                      placeholder="Enter company name"
+                      value={companyName}
+                      onChange={(e) => handleCompanyName(e.target.value)}
                     />
-                    <FieldError message={errors.instituteName} />
+                    <FieldError message={errors.companyName} />
                   </div>
                   <div className="space-y-2">
-                    <Label>College Code</Label>
-                    <Input
-                      placeholder="College code (optional)"
-                      value={instituteCode}
-                      onChange={(e) => handleInstituteCode(e.target.value)}
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label>Established Year</Label>
-                    <Input
-                      placeholder="e.g. 1990"
-                      type="number"
-                      min={1800}
-                      max={2026}
-                      value={establishedYear}
-                      onChange={(e) => handleEstablishedYear(e.target.value)}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Affiliation<RequiredMark /></Label>
-                    <Combobox items={AFFILIATION_OPTIONS} value={affiliation} onValueChange={(v) => handleAffiliation(v || "")}>
-                      <ComboboxInput placeholder="Select affiliation" />
+                    <Label>Industry Sector<RequiredMark /></Label>
+                    <Combobox items={INDUSTRY_SECTOR_OPTIONS} value={industrySector} onValueChange={(v) => handleIndustrySector(v || "")}>
+                      <ComboboxInput placeholder="Select industry" />
                       <ComboboxContent>
-                        <ComboboxEmpty>No affiliation found.</ComboboxEmpty>
+                        <ComboboxEmpty>No industry found.</ComboboxEmpty>
                         <ComboboxList>
-                          {AFFILIATION_OPTIONS.map((item) => (
+                          {INDUSTRY_SECTOR_OPTIONS.map((item) => (
                             <ComboboxItem key={item} value={item}>{item}</ComboboxItem>
                           ))}
                         </ComboboxList>
                       </ComboboxContent>
                     </Combobox>
-                    <FieldError message={errors.affiliation} />
+                    <FieldError message={errors.industrySector} />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Company Size</Label>
+                    <Combobox items={COMPANY_SIZE_OPTIONS} value={companySize} onValueChange={(v) => handleCompanySize(v || "")}>
+                      <ComboboxInput placeholder="Select size" />
+                      <ComboboxContent>
+                        <ComboboxEmpty>No size found.</ComboboxEmpty>
+                        <ComboboxList>
+                          {COMPANY_SIZE_OPTIONS.map((item) => (
+                            <ComboboxItem key={item} value={item}>{item}</ComboboxItem>
+                          ))}
+                        </ComboboxList>
+                      </ComboboxContent>
+                    </Combobox>
                   </div>
                 </div>
 
@@ -983,7 +956,7 @@ export function InstituteSettingsClient({ userProfile, initialData }: Props) {
             <Card>
               <CardHeader>
                 <CardTitle>Contact Information</CardTitle>
-                <CardDescription>Primary contact details for the institution</CardDescription>
+                <CardDescription>Primary contact details for the company</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
 
@@ -994,12 +967,12 @@ export function InstituteSettingsClient({ userProfile, initialData }: Props) {
                       Contact Number<RequiredMark />
                     </Label>
                     <Input
-                      placeholder="Institution contact number"
+                      placeholder="Company contact number"
                       type="tel"
-                      value={instPhone}
-                      onChange={(e) => handleInstPhone(e.target.value)}
+                      value={companyPhone}
+                      onChange={(e) => handleCompanyPhone(e.target.value)}
                     />
-                    <FieldError message={errors.instPhone} />
+                    <FieldError message={errors.companyPhone} />
                   </div>
                   <div className="space-y-2">
                     <Label className="flex items-center gap-1.5">
@@ -1007,97 +980,42 @@ export function InstituteSettingsClient({ userProfile, initialData }: Props) {
                       Email Address<RequiredMark />
                     </Label>
                     <Input
-                      placeholder="college@example.com"
+                      placeholder="contact@company.com"
                       type="email"
-                      value={instEmail}
-                      onChange={(e) => handleInstEmail(e.target.value)}
+                      value={companyEmail}
+                      onChange={(e) => handleCompanyEmail(e.target.value)}
                     />
-                    <FieldError message={errors.instEmail} />
+                    <FieldError message={errors.companyEmail} />
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                  <Label className="flex items-center gap-1.5">
-                    <Globe className="h-3.5 w-3.5 text-muted-foreground" />
-                    Website URL
-                  </Label>
-                  <Input
-                    placeholder="https://www.yourcollege.edu"
-                    type="url"
-                    value={websiteUrl}
-                    onChange={(e) => handleWebsiteUrl(e.target.value)}
-                  />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label className="flex items-center gap-1.5">
+                      <Globe className="h-3.5 w-3.5 text-muted-foreground" />
+                      Platform App URL
+                    </Label>
+                    <Input
+                      placeholder="https://platform.acadledger.com"
+                      type="url"
+                      value={websiteUrl}
+                      onChange={(e) => handleWebsiteUrl(e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="flex items-center gap-1.5">
+                      <Globe className="h-3.5 w-3.5 text-muted-foreground" />
+                      Company Website
+                    </Label>
+                    <Input
+                      placeholder="https://www.company.com"
+                      type="url"
+                      value={companyWebsite}
+                      onChange={(e) => handleCompanyWebsite(e.target.value)}
+                    />
+                  </div>
                 </div>
 
-              </CardContent>
-            </Card>
-
-            {/* Administrative Contacts */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Administrative Contacts</CardTitle>
-                <CardDescription>Key personnel contact information</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <p className="text-sm font-medium">Principal Details</p>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="space-y-2">
-                    <Label>Name<RequiredMark /></Label>
-                    <Input
-                      placeholder="Principal name"
-                      value={principalName}
-                      onChange={(e) => handlePrincipalName(e.target.value)}
-                    />
-                    <FieldError message={errors.principalName} />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Email<RequiredMark /></Label>
-                    <Input
-                      placeholder="principal@example.com"
-                      type="email"
-                      value={principalEmail}
-                      onChange={(e) => handlePrincipalEmail(e.target.value)}
-                    />
-                    <FieldError message={errors.principalEmail} />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Contact Number<RequiredMark /></Label>
-                    <Input
-                      placeholder="Contact number"
-                      type="tel"
-                      value={principalPhone}
-                      onChange={(e) => handlePrincipalPhone(e.target.value)}
-                    />
-                    <FieldError message={errors.principalPhone} />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Courses Offered */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Courses Offered</CardTitle>
-                <CardDescription>Departments / courses available at your institution</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {courses.map((course, index) => (
-                  <div key={index} className="flex items-center gap-2">
-                    <Input
-                      placeholder="e.g. Computer Science"
-                      value={course}
-                      onChange={(e) => handleCourseChange(index, e.target.value)}
-                    />
-                    {courses.length > 1 && (
-                      <Button variant="ghost" size="icon" type="button" onClick={() => removeCourse(index)}>
-                        <Minus className="h-4 w-4" />
-                      </Button>
-                    )}
-                  </div>
-                ))}
-                <Button variant="outline" size="sm" onClick={addCourse} type="button">
-                  <Plus className="h-4 w-4 mr-2" />Add course
-                </Button>
               </CardContent>
             </Card>
 
@@ -1105,7 +1023,7 @@ export function InstituteSettingsClient({ userProfile, initialData }: Props) {
             <Card>
               <CardHeader>
                 <CardTitle>Social Media &amp; Links</CardTitle>
-                <CardDescription>Connect your institution's social presence</CardDescription>
+                <CardDescription>Connect your company's social presence</CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">
                 {socialLinks.map((link, index) => (
@@ -1138,7 +1056,7 @@ export function InstituteSettingsClient({ userProfile, initialData }: Props) {
             <Card>
               <CardHeader>
                 <CardTitle>Change Password</CardTitle>
-                <CardDescription>Keep your college account secure with a strong password</CardDescription>
+                <CardDescription>Keep your company account secure with a strong password</CardDescription>
               </CardHeader>
               <CardContent>
                 {pwSuccess ? (
@@ -1296,8 +1214,8 @@ export function InstituteSettingsClient({ userProfile, initialData }: Props) {
               </CardHeader>
               <CardContent className="space-y-4">
                 {[
-                  { label: "Student Registration Alerts", desc: "Get notified when new students register" },
-                  { label: "Placement Updates", desc: "Notifications about placement activities" },
+                  { label: "Candidate Applications", desc: "Get notified when candidates apply to opportunities" },
+                  { label: "Hiring Activities", desc: "Notifications about test results and shortlists" },
                   { label: "System Announcements", desc: "Important system updates and changes" },
                   { label: "Weekly Reports", desc: "Receive weekly summary of activities" },
                 ].map(({ label, desc }) => (
@@ -1515,14 +1433,13 @@ export function InstituteSettingsClient({ userProfile, initialData }: Props) {
             <Card>
               <CardHeader>
                 <CardTitle>Privacy Controls</CardTitle>
-                <CardDescription>Manage your institution's data privacy</CardDescription>
+                <CardDescription>Manage your company's data privacy</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 {[
-                  { label: "Public Profile", desc: "Make college info visible to recruiters" },
-                  { label: "Student Data Sharing", desc: "Allow sharing student data with verified recruiters" },
+                  { label: "Public Profile", desc: "Make company info visible to candidates" },
                   { label: "Analytics & Insights", desc: "Help improve platform with usage data" },
-                  { label: "Placement Statistics", desc: "Share placement statistics publicly" },
+                  { label: "Hiring Statistics", desc: "Share hiring statistics publicly" },
                 ].map(({ label, desc }) => (
                   <div key={label} className="flex items-center justify-between">
                     <div>
@@ -1537,7 +1454,7 @@ export function InstituteSettingsClient({ userProfile, initialData }: Props) {
             <Card>
               <CardHeader>
                 <CardTitle>Data Management</CardTitle>
-                <CardDescription>Export or delete your institution data</CardDescription>
+                <CardDescription>Export or delete your company data</CardDescription>
               </CardHeader>
               <CardContent className="flex flex-wrap gap-3">
                 <Button variant="outline">Export All Data</Button>

@@ -7,56 +7,61 @@ export type Json =
   | Json[]
 
 export type Database = {
-  graphql_public: {
-    Tables: {
-      [_ in never]: never
-    }
-    Views: {
-      [_ in never]: never
-    }
-    Functions: {
-      graphql: {
-        Args: {
-          extensions?: Json
-          operationName?: string
-          query?: string
-          variables?: Json
-        }
-        Returns: Json
-      }
-    }
-    Enums: {
-      [_ in never]: never
-    }
-    CompositeTypes: {
-      [_ in never]: never
-    }
-  }
-  pgbouncer: {
-    Tables: {
-      [_ in never]: never
-    }
-    Views: {
-      [_ in never]: never
-    }
-    Functions: {
-      get_auth: {
-        Args: { p_usename: string }
-        Returns: {
-          password: string
-          username: string
-        }[]
-      }
-    }
-    Enums: {
-      [_ in never]: never
-    }
-    CompositeTypes: {
-      [_ in never]: never
-    }
+  // Allows to automatically instantiate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
+  __InternalSupabase: {
+    PostgrestVersion: "14.4"
   }
   public: {
     Tables: {
+      applications: {
+        Row: {
+          applied_at: string | null
+          candidate_id: string | null
+          cover_letter: string | null
+          id: string
+          opportunity_id: string | null
+          resume_path: string | null
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          applied_at?: string | null
+          candidate_id?: string | null
+          cover_letter?: string | null
+          id?: string
+          opportunity_id?: string | null
+          resume_path?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          applied_at?: string | null
+          candidate_id?: string | null
+          cover_letter?: string | null
+          id?: string
+          opportunity_id?: string | null
+          resume_path?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "applications_candidate_id_fkey"
+            columns: ["candidate_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "applications_opportunity_id_fkey"
+            columns: ["opportunity_id"]
+            isOneToOne: false
+            referencedRelation: "opportunities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       attempt_answers: {
         Row: {
           answered_at: string
@@ -95,30 +100,35 @@ export type Database = {
           {
             foreignKeyName: "attempt_answers_attempt_id_fkey"
             columns: ["attempt_id"]
+            isOneToOne: false
             referencedRelation: "attempt_details"
             referencedColumns: ["id"]
           },
           {
             foreignKeyName: "attempt_answers_attempt_id_fkey"
             columns: ["attempt_id"]
+            isOneToOne: false
             referencedRelation: "test_attempts"
             referencedColumns: ["id"]
           },
           {
             foreignKeyName: "attempt_answers_attempt_id_fkey"
             columns: ["attempt_id"]
+            isOneToOne: false
             referencedRelation: "view_test_results_detailed"
             referencedColumns: ["attempt_id"]
           },
           {
             foreignKeyName: "attempt_answers_question_id_fkey"
             columns: ["question_id"]
+            isOneToOne: false
             referencedRelation: "questions"
             referencedColumns: ["id"]
           },
           {
             foreignKeyName: "attempt_answers_question_id_fkey"
             columns: ["question_id"]
+            isOneToOne: false
             referencedRelation: "view_question_analysis"
             referencedColumns: ["question_id"]
           },
@@ -126,7 +136,6 @@ export type Database = {
       }
       candidate_profiles: {
         Row: {
-          aadhaar_number: string | null
           cgpa: number | null
           course_name: string | null
           created_at: string
@@ -140,8 +149,6 @@ export type Database = {
           github_url: string | null
           hsc_pass_year: number | null
           hsc_percentage: number | null
-          institute_id: string | null
-          institute_verified: boolean | null
           is_diploma: boolean | null
           is_hsc: boolean | null
           last_name: string | null
@@ -155,6 +162,7 @@ export type Database = {
           profile_id: string
           profile_image_path: string | null
           profile_updated: boolean
+          recruiter_id: string | null
           sgpa_sem1: number | null
           sgpa_sem10: number | null
           sgpa_sem2: number | null
@@ -168,11 +176,9 @@ export type Database = {
           skills: string[] | null
           ssc_pass_year: number | null
           ssc_percentage: number | null
-          university_prn: string | null
           updated_at: string
         }
         Insert: {
-          aadhaar_number?: string | null
           cgpa?: number | null
           course_name?: string | null
           created_at?: string
@@ -186,8 +192,6 @@ export type Database = {
           github_url?: string | null
           hsc_pass_year?: number | null
           hsc_percentage?: number | null
-          institute_id?: string | null
-          institute_verified?: boolean | null
           is_diploma?: boolean | null
           is_hsc?: boolean | null
           last_name?: string | null
@@ -201,6 +205,7 @@ export type Database = {
           profile_id: string
           profile_image_path?: string | null
           profile_updated?: boolean
+          recruiter_id?: string | null
           sgpa_sem1?: number | null
           sgpa_sem10?: number | null
           sgpa_sem2?: number | null
@@ -214,11 +219,9 @@ export type Database = {
           skills?: string[] | null
           ssc_pass_year?: number | null
           ssc_percentage?: number | null
-          university_prn?: string | null
           updated_at?: string
         }
         Update: {
-          aadhaar_number?: string | null
           cgpa?: number | null
           course_name?: string | null
           created_at?: string
@@ -232,8 +235,6 @@ export type Database = {
           github_url?: string | null
           hsc_pass_year?: number | null
           hsc_percentage?: number | null
-          institute_id?: string | null
-          institute_verified?: boolean | null
           is_diploma?: boolean | null
           is_hsc?: boolean | null
           last_name?: string | null
@@ -247,6 +248,7 @@ export type Database = {
           profile_id?: string
           profile_image_path?: string | null
           profile_updated?: boolean
+          recruiter_id?: string | null
           sgpa_sem1?: number | null
           sgpa_sem10?: number | null
           sgpa_sem2?: number | null
@@ -260,100 +262,91 @@ export type Database = {
           skills?: string[] | null
           ssc_pass_year?: number | null
           ssc_percentage?: number | null
-          university_prn?: string | null
           updated_at?: string
         }
         Relationships: [
           {
             foreignKeyName: "candidate_profiles_profile_id_fkey"
             columns: ["profile_id"]
+            isOneToOne: true
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
       }
-      institute_profiles: {
+      opportunities: {
         Row: {
-          address: string | null
-          affiliation: string | null
-          city: string | null
-          country: string | null
-          courses: string[] | null
+          application_deadline: string | null
+          associated_test_id: string | null
           created_at: string
-          email: string | null
-          established_year: number | null
-          institute_code: string | null
-          institute_name: string
-          logo_path: string | null
-          phone_number: string | null
-          pincode: string | null
-          principal_email: string | null
-          principal_name: string | null
-          principal_phone: string | null
-          profile_complete: boolean | null
-          profile_id: string
-          profile_updated: boolean
-          social_links: string[] | null
-          state: string | null
-          updated_at: string
-          website_url: string | null
+          description: string
+          duration: string | null
+          id: string
+          is_remote: boolean | null
+          location: string | null
+          max_applications: number | null
+          recruiter_id: string
+          required_skills: Json
+          status: string
+          stipend: string | null
+          title: string
+          updated_at: string | null
         }
         Insert: {
-          address?: string | null
-          affiliation?: string | null
-          city?: string | null
-          country?: string | null
-          courses?: string[] | null
+          application_deadline?: string | null
+          associated_test_id?: string | null
           created_at?: string
-          email?: string | null
-          established_year?: number | null
-          institute_code?: string | null
-          institute_name: string
-          logo_path?: string | null
-          phone_number?: string | null
-          pincode?: string | null
-          principal_email?: string | null
-          principal_name?: string | null
-          principal_phone?: string | null
-          profile_complete?: boolean | null
-          profile_id: string
-          profile_updated?: boolean
-          social_links?: string[] | null
-          state?: string | null
-          updated_at?: string
-          website_url?: string | null
+          description: string
+          duration?: string | null
+          id?: string
+          is_remote?: boolean | null
+          location?: string | null
+          max_applications?: number | null
+          recruiter_id: string
+          required_skills?: Json
+          status?: string
+          stipend?: string | null
+          title: string
+          updated_at?: string | null
         }
         Update: {
-          address?: string | null
-          affiliation?: string | null
-          city?: string | null
-          country?: string | null
-          courses?: string[] | null
+          application_deadline?: string | null
+          associated_test_id?: string | null
           created_at?: string
-          email?: string | null
-          established_year?: number | null
-          institute_code?: string | null
-          institute_name?: string
-          logo_path?: string | null
-          phone_number?: string | null
-          pincode?: string | null
-          principal_email?: string | null
-          principal_name?: string | null
-          principal_phone?: string | null
-          profile_complete?: boolean | null
-          profile_id?: string
-          profile_updated?: boolean
-          social_links?: string[] | null
-          state?: string | null
-          updated_at?: string
-          website_url?: string | null
+          description?: string
+          duration?: string | null
+          id?: string
+          is_remote?: boolean | null
+          location?: string | null
+          max_applications?: number | null
+          recruiter_id?: string
+          required_skills?: Json
+          status?: string
+          stipend?: string | null
+          title?: string
+          updated_at?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: "institute_profiles_profile_id_fkey"
-            columns: ["profile_id"]
-            referencedRelation: "profiles"
+            foreignKeyName: "opportunities_associated_test_id_fkey"
+            columns: ["associated_test_id"]
+            isOneToOne: false
+            referencedRelation: "tests"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "opportunities_associated_test_id_fkey"
+            columns: ["associated_test_id"]
+            isOneToOne: false
+            referencedRelation: "view_test_summary"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "opportunities_recruiter_id_fkey"
+            columns: ["recruiter_id"]
+            isOneToOne: false
+            referencedRelation: "recruiter_profiles"
+            referencedColumns: ["profile_id"]
           },
         ]
       }
@@ -386,12 +379,14 @@ export type Database = {
           {
             foreignKeyName: "options_question_id_fkey"
             columns: ["question_id"]
+            isOneToOne: false
             referencedRelation: "questions"
             referencedColumns: ["id"]
           },
           {
             foreignKeyName: "options_question_id_fkey"
             columns: ["question_id"]
+            isOneToOne: false
             referencedRelation: "view_question_analysis"
             referencedColumns: ["question_id"]
           },
@@ -453,24 +448,28 @@ export type Database = {
           {
             foreignKeyName: "question_tags_question_id_fkey"
             columns: ["question_id"]
+            isOneToOne: false
             referencedRelation: "questions"
             referencedColumns: ["id"]
           },
           {
             foreignKeyName: "question_tags_question_id_fkey"
             columns: ["question_id"]
+            isOneToOne: false
             referencedRelation: "view_question_analysis"
             referencedColumns: ["question_id"]
           },
           {
             foreignKeyName: "question_tags_tag_id_fkey"
             columns: ["tag_id"]
+            isOneToOne: false
             referencedRelation: "tag_performance"
             referencedColumns: ["tag_id"]
           },
           {
             foreignKeyName: "question_tags_tag_id_fkey"
             columns: ["tag_id"]
+            isOneToOne: false
             referencedRelation: "tags"
             referencedColumns: ["id"]
           },
@@ -520,13 +519,89 @@ export type Database = {
           {
             foreignKeyName: "questions_test_id_fkey"
             columns: ["test_id"]
+            isOneToOne: false
             referencedRelation: "tests"
             referencedColumns: ["id"]
           },
           {
             foreignKeyName: "questions_test_id_fkey"
             columns: ["test_id"]
+            isOneToOne: false
             referencedRelation: "view_test_summary"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      recruiter_profiles: {
+        Row: {
+          address: string | null
+          city: string | null
+          company_name: string
+          company_size: string | null
+          company_website: string | null
+          country: string | null
+          created_at: string
+          email: string | null
+          industry_sector: string | null
+          logo_path: string | null
+          phone_number: string | null
+          pincode: string | null
+          profile_complete: boolean | null
+          profile_id: string
+          profile_updated: boolean
+          social_links: string[] | null
+          state: string | null
+          updated_at: string
+          website_url: string | null
+        }
+        Insert: {
+          address?: string | null
+          city?: string | null
+          company_name: string
+          company_size?: string | null
+          company_website?: string | null
+          country?: string | null
+          created_at?: string
+          email?: string | null
+          industry_sector?: string | null
+          logo_path?: string | null
+          phone_number?: string | null
+          pincode?: string | null
+          profile_complete?: boolean | null
+          profile_id: string
+          profile_updated?: boolean
+          social_links?: string[] | null
+          state?: string | null
+          updated_at?: string
+          website_url?: string | null
+        }
+        Update: {
+          address?: string | null
+          city?: string | null
+          company_name?: string
+          company_size?: string | null
+          company_website?: string | null
+          country?: string | null
+          created_at?: string
+          email?: string | null
+          industry_sector?: string | null
+          logo_path?: string | null
+          phone_number?: string | null
+          pincode?: string | null
+          profile_complete?: boolean | null
+          profile_id?: string
+          profile_updated?: boolean
+          social_links?: string[] | null
+          state?: string | null
+          updated_at?: string
+          website_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "institute_profiles_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -614,18 +689,21 @@ export type Database = {
           {
             foreignKeyName: "test_attempts_student_id_fkey"
             columns: ["student_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
           {
             foreignKeyName: "test_attempts_test_id_fkey"
             columns: ["test_id"]
+            isOneToOne: false
             referencedRelation: "tests"
             referencedColumns: ["id"]
           },
           {
             foreignKeyName: "test_attempts_test_id_fkey"
             columns: ["test_id"]
+            isOneToOne: false
             referencedRelation: "view_test_summary"
             referencedColumns: ["id"]
           },
@@ -638,10 +716,10 @@ export type Database = {
           created_at: string
           description: string | null
           id: string
-          institute_id: string
           instructions: string | null
           max_attempts: number
           pass_percentage: number | null
+          recruiter_id: string
           results_available: boolean
           shuffle_options: boolean
           shuffle_questions: boolean
@@ -657,10 +735,10 @@ export type Database = {
           created_at?: string
           description?: string | null
           id?: string
-          institute_id: string
           instructions?: string | null
           max_attempts?: number
           pass_percentage?: number | null
+          recruiter_id: string
           results_available?: boolean
           shuffle_options?: boolean
           shuffle_questions?: boolean
@@ -676,10 +754,10 @@ export type Database = {
           created_at?: string
           description?: string | null
           id?: string
-          institute_id?: string
           instructions?: string | null
           max_attempts?: number
           pass_percentage?: number | null
+          recruiter_id?: string
           results_available?: boolean
           shuffle_options?: boolean
           shuffle_questions?: boolean
@@ -692,8 +770,9 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "tests_institute_id_fkey"
-            columns: ["institute_id"]
-            referencedRelation: "institute_profiles"
+            columns: ["recruiter_id"]
+            isOneToOne: false
+            referencedRelation: "recruiter_profiles"
             referencedColumns: ["profile_id"]
           },
         ]
@@ -733,6 +812,7 @@ export type Database = {
           {
             foreignKeyName: "user_sessions_user_id_fkey"
             columns: ["user_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -762,18 +842,21 @@ export type Database = {
           {
             foreignKeyName: "test_attempts_student_id_fkey"
             columns: ["student_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
           {
             foreignKeyName: "test_attempts_test_id_fkey"
             columns: ["test_id"]
+            isOneToOne: false
             referencedRelation: "tests"
             referencedColumns: ["id"]
           },
           {
             foreignKeyName: "test_attempts_test_id_fkey"
             columns: ["test_id"]
+            isOneToOne: false
             referencedRelation: "view_test_summary"
             referencedColumns: ["id"]
           },
@@ -793,18 +876,21 @@ export type Database = {
           {
             foreignKeyName: "test_attempts_student_id_fkey"
             columns: ["student_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
           {
             foreignKeyName: "test_attempts_test_id_fkey"
             columns: ["test_id"]
+            isOneToOne: false
             referencedRelation: "tests"
             referencedColumns: ["id"]
           },
           {
             foreignKeyName: "test_attempts_test_id_fkey"
             columns: ["test_id"]
+            isOneToOne: false
             referencedRelation: "view_test_summary"
             referencedColumns: ["id"]
           },
@@ -825,12 +911,14 @@ export type Database = {
           {
             foreignKeyName: "questions_test_id_fkey"
             columns: ["test_id"]
+            isOneToOne: false
             referencedRelation: "tests"
             referencedColumns: ["id"]
           },
           {
             foreignKeyName: "questions_test_id_fkey"
             columns: ["test_id"]
+            isOneToOne: false
             referencedRelation: "view_test_summary"
             referencedColumns: ["id"]
           },
@@ -860,18 +948,21 @@ export type Database = {
           {
             foreignKeyName: "test_attempts_student_id_fkey"
             columns: ["student_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
           {
             foreignKeyName: "test_attempts_test_id_fkey"
             columns: ["test_id"]
+            isOneToOne: false
             referencedRelation: "tests"
             referencedColumns: ["id"]
           },
           {
             foreignKeyName: "test_attempts_test_id_fkey"
             columns: ["test_id"]
+            isOneToOne: false
             referencedRelation: "view_test_summary"
             referencedColumns: ["id"]
           },
@@ -879,27 +970,24 @@ export type Database = {
       }
       view_test_summary: {
         Row: {
+          attempt_count: number | null
           available_from: string | null
           available_until: string | null
-          avg_score_pct: number | null
-          description: string | null
+          created_at: string | null
           id: string | null
-          institute_id: string | null
-          institute_name: string | null
           question_count: number | null
-          results_available: boolean | null
+          recruiter_id: string | null
+          recruiter_name: string | null
           status: Database["public"]["Enums"]["test_status"] | null
-          submitted_attempts: number | null
           time_limit_seconds: number | null
           title: string | null
-          total_attempts: number | null
-          total_marks: number | null
         }
         Relationships: [
           {
             foreignKeyName: "tests_institute_id_fkey"
-            columns: ["institute_id"]
-            referencedRelation: "institute_profiles"
+            columns: ["recruiter_id"]
+            isOneToOne: false
+            referencedRelation: "recruiter_profiles"
             referencedColumns: ["profile_id"]
           },
         ]
@@ -914,7 +1002,7 @@ export type Database = {
         Args: { p_profile_id: string }
         Returns: Json
       }
-      get_institute_home_stats: {
+      get_recruiter_home_stats: {
         Args: { p_profile_id: string }
         Returns: Json
       }
@@ -962,3 +1050,135 @@ export type Database = {
     }
   }
 }
+
+type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
+
+type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
+
+export type Tables<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
+    : never = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+      Row: infer R
+    }
+    ? R
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])
+    ? (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
+        Row: infer R
+      }
+      ? R
+      : never
+    : never
+
+export type TablesInsert<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    : never = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+      Insert: infer I
+    }
+    ? I
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+        Insert: infer I
+      }
+      ? I
+      : never
+    : never
+
+export type TablesUpdate<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    : never = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+      Update: infer U
+    }
+    ? U
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+        Update: infer U
+      }
+      ? U
+      : never
+    : never
+
+export type Enums<
+  DefaultSchemaEnumNameOrOptions extends
+    | keyof DefaultSchema["Enums"]
+    | { schema: keyof DatabaseWithoutInternals },
+  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
+    : never = never,
+> = DefaultSchemaEnumNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
+  : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
+    ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
+    : never
+
+export type CompositeTypes<
+  PublicCompositeTypeNameOrOptions extends
+    | keyof DefaultSchema["CompositeTypes"]
+    | { schema: keyof DatabaseWithoutInternals },
+  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+    : never = never,
+> = PublicCompositeTypeNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
+    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
+    : never
+
+export const Constants = {
+  public: {
+    Enums: {
+      attempt_status: [
+        "in_progress",
+        "submitted",
+        "abandoned",
+        "auto_submitted",
+      ],
+      question_type: ["single_correct", "multiple_correct", "true_false"],
+      test_status: ["draft", "published", "archived"],
+    },
+  },
+} as const

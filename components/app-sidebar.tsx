@@ -43,7 +43,7 @@ type NavItem = {
 }
 
 
-const VALID_ACCOUNT_TYPES: AccountType[] = ["candidate", "institute", "admin", "recruiter"]
+const VALID_ACCOUNT_TYPES: AccountType[] = ["candidate", "recruiter", "admin"]
 
 
 const NAV_MAIN: Record<AccountType, NavItem[]> = {
@@ -56,19 +56,10 @@ const NAV_MAIN: Record<AccountType, NavItem[]> = {
     { title: "Resume Analyzer", url: "/~/resume-analyzer", icon: IconFileAnalytics },
     { title: "Events", url: "/~/events", icon: IconCalendarEvent },
   ],
-  institute: [
-    { title: "Home", url: "/~/home", icon: IconHome },
-    { title: "Students", url: "/~/students", icon: IconSchool },
-    { title: "Drives", url: "/~/drives", icon: IconFolder },
-    { title: "Tests", url: "/~/tests", icon: IconChartBar },
-    { title: "Reports", url: "/~/reports", icon: IconReport },
-    { title: "Recruiters", url: "/~/recruiters", icon: IconBriefcase },
-  ],
   admin: [
     { title: "Home", url: "/~/home", icon: IconHome },
     { title: "Users", url: "/~/users", icon: IconUsers },
     { title: "Groups", url: "/~/groups", icon: IconUsersGroup },
-    { title: "Drives", url: "/~/drives", icon: IconFolder },
     { title: "Tests", url: "/~/tests", icon: IconChartBar },
     { title: "Events", url: "/~/events", icon: IconCalendarEvent },
     { title: "Analytics", url: "/~/analytics", icon: IconFileAnalytics },
@@ -77,8 +68,8 @@ const NAV_MAIN: Record<AccountType, NavItem[]> = {
   recruiter: [
     { title: "Home", url: "/~/home", icon: IconHome },
     { title: "Job Postings", url: "/~/postings", icon: IconBriefcase2 },
-    { title: "Candidates", url: "/~/candidates", icon: IconTargetArrow },
-    { title: "Drives", url: "/~/drives", icon: IconFolder },
+    { title: "Applications", url: "/~/applications", icon: IconClipboardList },
+    { title: "Talent Pool", url: "/~/candidates", icon: IconTargetArrow },
     { title: "Tests", url: "/~/tests", icon: IconChartBar },
     { title: "Reports", url: "/~/reports", icon: IconReport },
   ],
@@ -94,17 +85,15 @@ const NAV_SECONDARY: NavItem[] = [
 
 const ROLE_LABELS: Record<AccountType, string> = {
   candidate: "Candidate",
-  institute: "Institute",
-  admin: "Admin",
   recruiter: "Recruiter",
+  admin: "Admin",
 }
 
 
 const ROLE_COLORS: Record<AccountType, string> = {
   candidate: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
-  institute: "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400",
-  admin: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400",
   recruiter: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400",
+  admin: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400",
 }
 
 

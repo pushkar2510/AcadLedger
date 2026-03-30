@@ -13,8 +13,8 @@ CREATE TABLE public.candidate_profiles (
     aadhaar_number text,
     current_address text,
     permanent_address text,
-    institute_id uuid,
-    institute_verified boolean,
+    recruiter_id uuid,
+    recruiter_verified boolean,
     university_prn text,
     course_name text,
     passout_year smallint,
@@ -45,7 +45,7 @@ CREATE TABLE public.candidate_profiles (
     portfolio_links text[],
     created_at timestamp with time zone DEFAULT now() NOT NULL,
     updated_at timestamp with time zone DEFAULT now() NOT NULL,
-    profile_complete boolean GENERATED ALWAYS AS (((first_name IS NOT NULL) AND (TRIM(BOTH FROM first_name) <> ''::text) AND (middle_name IS NOT NULL) AND (TRIM(BOTH FROM middle_name) <> ''::text) AND (last_name IS NOT NULL) AND (TRIM(BOTH FROM last_name) <> ''::text) AND (phone_number IS NOT NULL) AND (date_of_birth IS NOT NULL) AND (gender IS NOT NULL) AND (institute_id IS NOT NULL) AND (course_name IS NOT NULL) AND (passout_year IS NOT NULL) AND (ssc_percentage IS NOT NULL))) STORED,
+    profile_complete boolean GENERATED ALWAYS AS (((first_name IS NOT NULL) AND (TRIM(BOTH FROM first_name) <> ''::text) AND (middle_name IS NOT NULL) AND (TRIM(BOTH FROM middle_name) <> ''::text) AND (last_name IS NOT NULL) AND (TRIM(BOTH FROM last_name) <> ''::text) AND (phone_number IS NOT NULL) AND (date_of_birth IS NOT NULL) AND (gender IS NOT NULL) AND (recruiter_id IS NOT NULL) AND (course_name IS NOT NULL) AND (passout_year IS NOT NULL) AND (ssc_percentage IS NOT NULL))) STORED,
     CONSTRAINT candidate_profiles_aadhaar_number_check CHECK ((aadhaar_number ~ '^[0-9]{12}$'::text)),
     CONSTRAINT candidate_profiles_cgpa_check CHECK ((cgpa <= (10)::numeric)),
     CONSTRAINT candidate_profiles_date_of_birth_check CHECK ((date_of_birth <= CURRENT_DATE)),
@@ -69,13 +69,13 @@ CREATE TABLE public.candidate_profiles (
 
 
 --
--- Name: institute_profiles; Type: TABLE; Schema: public; Owner: postgres
+-- Name: recruiter_profiles; Type: TABLE; Schema: public; Owner: postgres
 --
 
-CREATE TABLE public.institute_profiles (
+CREATE TABLE public.recruiter_profiles (
     profile_id uuid NOT NULL,
-    institute_name text NOT NULL,
-    institute_code text,
+    recruiter_name text NOT NULL,
+    recruiter_code text,
     established_year smallint,
     affiliation text,
     address text,
@@ -95,7 +95,7 @@ CREATE TABLE public.institute_profiles (
     created_at timestamp with time zone DEFAULT now() NOT NULL,
     updated_at timestamp with time zone DEFAULT now() NOT NULL,
     profile_updated boolean DEFAULT false NOT NULL,
-    profile_complete boolean GENERATED ALWAYS AS (((institute_name IS NOT NULL) AND (TRIM(BOTH FROM institute_name) <> ''::text) AND ((address IS NOT NULL) AND (TRIM(BOTH FROM address) <> ''::text)) AND ((city IS NOT NULL) AND (TRIM(BOTH FROM city) <> ''::text)) AND ((state IS NOT NULL) AND (TRIM(BOTH FROM state) <> ''::text)) AND ((phone_number IS NOT NULL) AND (TRIM(BOTH FROM phone_number) <> ''::text)) AND ((email IS NOT NULL) AND (TRIM(BOTH FROM email) <> ''::text)))) STORED
+    profile_complete boolean GENERATED ALWAYS AS (((recruiter_name IS NOT NULL) AND (TRIM(BOTH FROM recruiter_name) <> ''::text) AND ((address IS NOT NULL) AND (TRIM(BOTH FROM address) <> ''::text)) AND ((city IS NOT NULL) AND (TRIM(BOTH FROM city) <> ''::text)) AND ((state IS NOT NULL) AND (TRIM(BOTH FROM state) <> ''::text)) AND ((phone_number IS NOT NULL) AND (TRIM(BOTH FROM phone_number) <> ''::text)) AND ((email IS NOT NULL) AND (TRIM(BOTH FROM email) <> ''::text)))) STORED
 );
 
 
@@ -193,7 +193,7 @@ CREATE OR REPLACE VIEW public.tag_performance AS
 
 CREATE TABLE public.tests (
     id uuid DEFAULT gen_random_uuid() NOT NULL,
-    institute_id uuid NOT NULL,
+    recruiter_id uuid NOT NULL,
     title text NOT NULL,
     description text,
     instructions text,
@@ -293,8 +293,8 @@ CREATE OR REPLACE VIEW public.view_test_summary AS
  SELECT t.id,
     t.title,
     t.description,
-    t.institute_id,
-    ip.institute_name,
+    t.recruiter_id,
+    ip.recruiter_name,
     t.status,
     t.available_from,
     t.available_until,
@@ -316,7 +316,7 @@ CREATE OR REPLACE VIEW public.view_test_summary AS
            FROM public.test_attempts ta
           WHERE ((ta.test_id = t.id) AND (ta.status = 'submitted'::public.attempt_status))) AS avg_score_pct
    FROM (public.tests t
-     LEFT JOIN public.institute_profiles ip ON ((t.institute_id = ip.profile_id)));
+     LEFT JOIN public.recruiter_profiles ip ON ((t.recruiter_id = ip.profile_id)));
 
 
 
@@ -345,11 +345,11 @@ ALTER TABLE ONLY public.candidate_profiles
 
 
 --
--- Name: institute_profiles institute_profiles_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: recruiter_profiles recruiter_profiles_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public.institute_profiles
-    ADD CONSTRAINT institute_profiles_pkey PRIMARY KEY (profile_id);
+ALTER TABLE ONLY public.recruiter_profiles
+    ADD CONSTRAINT recruiter_profiles_pkey PRIMARY KEY (profile_id);
 
 
 --
@@ -527,10 +527,10 @@ CREATE INDEX idx_test_attempts_student_test_status ON public.test_attempts USING
 
 
 --
--- Name: idx_tests_institute_id; Type: INDEX; Schema: public; Owner: postgres
+-- Name: idx_tests_recruiter_id; Type: INDEX; Schema: public; Owner: postgres
 --
 
-CREATE INDEX idx_tests_institute_id ON public.tests USING btree (institute_id);
+CREATE INDEX idx_tests_recruiter_id ON public.tests USING btree (recruiter_id);
 
 
 --
@@ -576,17 +576,17 @@ CREATE OR REPLACE TRIGGER trg_candidate_profiles_updated_at BEFORE UPDATE ON pub
 
 
 --
--- Name: institute_profiles trg_institute_profiles_sync; Type: TRIGGER; Schema: public; Owner: postgres
+-- Name: recruiter_profiles trg_recruiter_profiles_sync; Type: TRIGGER; Schema: public; Owner: postgres
 --
 
-CREATE OR REPLACE TRIGGER trg_institute_profiles_sync AFTER INSERT OR UPDATE OF institute_name, logo_path ON public.institute_profiles FOR EACH ROW EXECUTE FUNCTION public.sync_institute_profile();
+CREATE OR REPLACE TRIGGER trg_recruiter_profiles_sync AFTER INSERT OR UPDATE OF recruiter_name, logo_path ON public.recruiter_profiles FOR EACH ROW EXECUTE FUNCTION public.sync_recruiter_profile();
 
 
 --
--- Name: institute_profiles trg_institute_profiles_updated_at; Type: TRIGGER; Schema: public; Owner: postgres
+-- Name: recruiter_profiles trg_recruiter_profiles_updated_at; Type: TRIGGER; Schema: public; Owner: postgres
 --
 
-CREATE OR REPLACE TRIGGER trg_institute_profiles_updated_at BEFORE UPDATE ON public.institute_profiles FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
+CREATE OR REPLACE TRIGGER trg_recruiter_profiles_updated_at BEFORE UPDATE ON public.recruiter_profiles FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
 
 
 --
@@ -635,11 +635,11 @@ ALTER TABLE ONLY public.candidate_profiles
 
 
 --
--- Name: institute_profiles institute_profiles_profile_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: recruiter_profiles recruiter_profiles_profile_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public.institute_profiles
-    ADD CONSTRAINT institute_profiles_profile_id_fkey FOREIGN KEY (profile_id) REFERENCES public.profiles(id) ON DELETE CASCADE;
+ALTER TABLE ONLY public.recruiter_profiles
+    ADD CONSTRAINT recruiter_profiles_profile_id_fkey FOREIGN KEY (profile_id) REFERENCES public.profiles(id) ON DELETE CASCADE;
 
 
 --
@@ -699,11 +699,11 @@ ALTER TABLE ONLY public.test_attempts
 
 
 --
--- Name: tests tests_institute_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: tests tests_recruiter_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.tests
-    ADD CONSTRAINT tests_institute_id_fkey FOREIGN KEY (institute_id) REFERENCES public.institute_profiles(profile_id) ON DELETE CASCADE;
+    ADD CONSTRAINT tests_recruiter_id_fkey FOREIGN KEY (recruiter_id) REFERENCES public.recruiter_profiles(profile_id) ON DELETE CASCADE;
 
 
 --
@@ -715,14 +715,14 @@ ALTER TABLE ONLY public.user_sessions
 
 
 --
--- Name: attempt_answers Attempt answers are viewable by student and institute; Type: POLICY; Schema: public; Owner: postgres
+-- Name: attempt_answers Attempt answers are viewable by student and recruiter; Type: POLICY; Schema: public; Owner: postgres
 --
 
-CREATE POLICY "Attempt answers are viewable by student and institute" ON public.attempt_answers FOR SELECT TO authenticated USING ((EXISTS ( SELECT 1
+CREATE POLICY "Attempt answers are viewable by student and recruiter" ON public.attempt_answers FOR SELECT TO authenticated USING ((EXISTS ( SELECT 1
    FROM public.test_attempts
   WHERE ((test_attempts.id = attempt_answers.attempt_id) AND ((test_attempts.student_id = ( SELECT auth.uid() AS uid)) OR (EXISTS ( SELECT 1
            FROM public.tests
-          WHERE ((tests.id = test_attempts.test_id) AND (tests.institute_id = ( SELECT auth.uid() AS uid))))))))));
+          WHERE ((tests.id = test_attempts.test_id) AND (tests.recruiter_id = ( SELECT auth.uid() AS uid))))))))));
 
 
 --
@@ -740,118 +740,118 @@ CREATE POLICY "Candidate profiles are viewable by authenticated users" ON public
 
 
 --
--- Name: institute_profiles Institute profiles are viewable by authenticated users; Type: POLICY; Schema: public; Owner: postgres
+-- Name: recruiter_profiles Recruiter profiles are viewable by authenticated users; Type: POLICY; Schema: public; Owner: postgres
 --
 
-CREATE POLICY "Institute profiles are viewable by authenticated users" ON public.institute_profiles FOR SELECT TO authenticated USING (true);
-
-
---
--- Name: tests Institutes can delete their own tests; Type: POLICY; Schema: public; Owner: postgres
---
-
-CREATE POLICY "Institutes can delete their own tests" ON public.tests FOR DELETE TO authenticated USING ((institute_id = ( SELECT auth.uid() AS uid)));
+CREATE POLICY "Recruiter profiles are viewable by authenticated users" ON public.recruiter_profiles FOR SELECT TO authenticated USING (true);
 
 
 --
--- Name: tests Institutes can insert their own tests; Type: POLICY; Schema: public; Owner: postgres
+-- Name: tests Recruiters can delete their own tests; Type: POLICY; Schema: public; Owner: postgres
 --
 
-CREATE POLICY "Institutes can insert their own tests" ON public.tests FOR INSERT TO authenticated WITH CHECK ((institute_id = ( SELECT auth.uid() AS uid)));
+CREATE POLICY "Recruiters can delete their own tests" ON public.tests FOR DELETE TO authenticated USING ((recruiter_id = ( SELECT auth.uid() AS uid)));
 
 
 --
--- Name: options Institutes can modify options for their tests_delete; Type: POLICY; Schema: public; Owner: postgres
+-- Name: tests Recruiters can insert their own tests; Type: POLICY; Schema: public; Owner: postgres
 --
 
-CREATE POLICY "Institutes can modify options for their tests_delete" ON public.options FOR DELETE TO authenticated USING ((EXISTS ( SELECT 1
+CREATE POLICY "Recruiters can insert their own tests" ON public.tests FOR INSERT TO authenticated WITH CHECK ((recruiter_id = ( SELECT auth.uid() AS uid)));
+
+
+--
+-- Name: options Recruiters can modify options for their tests_delete; Type: POLICY; Schema: public; Owner: postgres
+--
+
+CREATE POLICY "Recruiters can modify options for their tests_delete" ON public.options FOR DELETE TO authenticated USING ((EXISTS ( SELECT 1
    FROM (public.questions q
      JOIN public.tests t ON ((q.test_id = t.id)))
-  WHERE ((q.id = options.question_id) AND (t.institute_id = auth.uid())))));
+  WHERE ((q.id = options.question_id) AND (t.recruiter_id = auth.uid())))));
 
 
 --
--- Name: options Institutes can modify options for their tests_insert; Type: POLICY; Schema: public; Owner: postgres
+-- Name: options Recruiters can modify options for their tests_insert; Type: POLICY; Schema: public; Owner: postgres
 --
 
-CREATE POLICY "Institutes can modify options for their tests_insert" ON public.options FOR INSERT TO authenticated WITH CHECK ((EXISTS ( SELECT 1
+CREATE POLICY "Recruiters can modify options for their tests_insert" ON public.options FOR INSERT TO authenticated WITH CHECK ((EXISTS ( SELECT 1
    FROM (public.questions q
      JOIN public.tests t ON ((q.test_id = t.id)))
-  WHERE ((q.id = options.question_id) AND (t.institute_id = auth.uid())))));
+  WHERE ((q.id = options.question_id) AND (t.recruiter_id = auth.uid())))));
 
 
 --
--- Name: options Institutes can modify options for their tests_update; Type: POLICY; Schema: public; Owner: postgres
+-- Name: options Recruiters can modify options for their tests_update; Type: POLICY; Schema: public; Owner: postgres
 --
 
-CREATE POLICY "Institutes can modify options for their tests_update" ON public.options FOR UPDATE TO authenticated USING ((EXISTS ( SELECT 1
+CREATE POLICY "Recruiters can modify options for their tests_update" ON public.options FOR UPDATE TO authenticated USING ((EXISTS ( SELECT 1
    FROM (public.questions q
      JOIN public.tests t ON ((q.test_id = t.id)))
-  WHERE ((q.id = options.question_id) AND (t.institute_id = auth.uid())))));
+  WHERE ((q.id = options.question_id) AND (t.recruiter_id = auth.uid())))));
 
 
 --
--- Name: question_tags Institutes can modify question tags for their tests_delete; Type: POLICY; Schema: public; Owner: postgres
+-- Name: question_tags Recruiters can modify question tags for their tests_delete; Type: POLICY; Schema: public; Owner: postgres
 --
 
-CREATE POLICY "Institutes can modify question tags for their tests_delete" ON public.question_tags FOR DELETE TO authenticated USING ((EXISTS ( SELECT 1
+CREATE POLICY "Recruiters can modify question tags for their tests_delete" ON public.question_tags FOR DELETE TO authenticated USING ((EXISTS ( SELECT 1
    FROM (public.questions q
      JOIN public.tests t ON ((q.test_id = t.id)))
-  WHERE ((q.id = question_tags.question_id) AND (t.institute_id = auth.uid())))));
+  WHERE ((q.id = question_tags.question_id) AND (t.recruiter_id = auth.uid())))));
 
 
 --
--- Name: question_tags Institutes can modify question tags for their tests_insert; Type: POLICY; Schema: public; Owner: postgres
+-- Name: question_tags Recruiters can modify question tags for their tests_insert; Type: POLICY; Schema: public; Owner: postgres
 --
 
-CREATE POLICY "Institutes can modify question tags for their tests_insert" ON public.question_tags FOR INSERT TO authenticated WITH CHECK ((EXISTS ( SELECT 1
+CREATE POLICY "Recruiters can modify question tags for their tests_insert" ON public.question_tags FOR INSERT TO authenticated WITH CHECK ((EXISTS ( SELECT 1
    FROM (public.questions q
      JOIN public.tests t ON ((q.test_id = t.id)))
-  WHERE ((q.id = question_tags.question_id) AND (t.institute_id = auth.uid())))));
+  WHERE ((q.id = question_tags.question_id) AND (t.recruiter_id = auth.uid())))));
 
 
 --
--- Name: question_tags Institutes can modify question tags for their tests_update; Type: POLICY; Schema: public; Owner: postgres
+-- Name: question_tags Recruiters can modify question tags for their tests_update; Type: POLICY; Schema: public; Owner: postgres
 --
 
-CREATE POLICY "Institutes can modify question tags for their tests_update" ON public.question_tags FOR UPDATE TO authenticated USING ((EXISTS ( SELECT 1
+CREATE POLICY "Recruiters can modify question tags for their tests_update" ON public.question_tags FOR UPDATE TO authenticated USING ((EXISTS ( SELECT 1
    FROM (public.questions q
      JOIN public.tests t ON ((q.test_id = t.id)))
-  WHERE ((q.id = question_tags.question_id) AND (t.institute_id = auth.uid())))));
+  WHERE ((q.id = question_tags.question_id) AND (t.recruiter_id = auth.uid())))));
 
 
 --
--- Name: questions Institutes can modify questions for their tests_delete; Type: POLICY; Schema: public; Owner: postgres
+-- Name: questions Recruiters can modify questions for their tests_delete; Type: POLICY; Schema: public; Owner: postgres
 --
 
-CREATE POLICY "Institutes can modify questions for their tests_delete" ON public.questions FOR DELETE TO authenticated USING ((EXISTS ( SELECT 1
+CREATE POLICY "Recruiters can modify questions for their tests_delete" ON public.questions FOR DELETE TO authenticated USING ((EXISTS ( SELECT 1
    FROM public.tests
-  WHERE ((tests.id = questions.test_id) AND (tests.institute_id = auth.uid())))));
+  WHERE ((tests.id = questions.test_id) AND (tests.recruiter_id = auth.uid())))));
 
 
 --
--- Name: questions Institutes can modify questions for their tests_insert; Type: POLICY; Schema: public; Owner: postgres
+-- Name: questions Recruiters can modify questions for their tests_insert; Type: POLICY; Schema: public; Owner: postgres
 --
 
-CREATE POLICY "Institutes can modify questions for their tests_insert" ON public.questions FOR INSERT TO authenticated WITH CHECK ((EXISTS ( SELECT 1
+CREATE POLICY "Recruiters can modify questions for their tests_insert" ON public.questions FOR INSERT TO authenticated WITH CHECK ((EXISTS ( SELECT 1
    FROM public.tests
-  WHERE ((tests.id = questions.test_id) AND (tests.institute_id = auth.uid())))));
+  WHERE ((tests.id = questions.test_id) AND (tests.recruiter_id = auth.uid())))));
 
 
 --
--- Name: questions Institutes can modify questions for their tests_update; Type: POLICY; Schema: public; Owner: postgres
+-- Name: questions Recruiters can modify questions for their tests_update; Type: POLICY; Schema: public; Owner: postgres
 --
 
-CREATE POLICY "Institutes can modify questions for their tests_update" ON public.questions FOR UPDATE TO authenticated USING ((EXISTS ( SELECT 1
+CREATE POLICY "Recruiters can modify questions for their tests_update" ON public.questions FOR UPDATE TO authenticated USING ((EXISTS ( SELECT 1
    FROM public.tests
-  WHERE ((tests.id = questions.test_id) AND (tests.institute_id = auth.uid())))));
+  WHERE ((tests.id = questions.test_id) AND (tests.recruiter_id = auth.uid())))));
 
 
 --
--- Name: tests Institutes can update their own tests; Type: POLICY; Schema: public; Owner: postgres
+-- Name: tests Recruiters can update their own tests; Type: POLICY; Schema: public; Owner: postgres
 --
 
-CREATE POLICY "Institutes can update their own tests" ON public.tests FOR UPDATE TO authenticated USING ((institute_id = ( SELECT auth.uid() AS uid))) WITH CHECK ((institute_id = ( SELECT auth.uid() AS uid)));
+CREATE POLICY "Recruiters can update their own tests" ON public.tests FOR UPDATE TO authenticated USING ((recruiter_id = ( SELECT auth.uid() AS uid))) WITH CHECK ((recruiter_id = ( SELECT auth.uid() AS uid)));
 
 
 --
