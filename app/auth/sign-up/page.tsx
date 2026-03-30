@@ -3,7 +3,7 @@
 "use client";
 
 import type React from "react";
-import { useState, useEffect, useRef } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -12,7 +12,6 @@ import {
   InputGroupAddon,
   InputGroupInput,
 } from "@/components/ui/input-group";
-import { OTPInput } from "@/components/ui/otp-input";
 import {
   AtSignIcon,
   EyeIcon,
@@ -24,10 +23,6 @@ import {
 import { createClient } from "@/lib/supabase/client";
 import { GoogleOneTap } from "@/components/auth/google-one-tap";
 
-type PageState = "sign-up-form" | "otp-entry";
-
-const RESEND_COOLDOWN = 60;
-
 const GoogleIcon = (props: React.ComponentProps<"svg">) => (
   <svg fill="currentColor" viewBox="0 0 24 24" {...props}>
     <path d="M12.479,14.265v-3.279h11.049c0.108,0.571,0.164,1.247,0.164,1.979c0,2.46-0.672,5.502-2.84,7.669C18.744,22.829,16.051,24,12.483,24C5.869,24,0.308,18.613,0.308,12S5.869,0,12.483,0c3.659,0,6.265,1.436,8.223,3.307L18.392,5.62c-1.404-1.317-3.307-2.341-5.913-2.341C7.65,3.279,3.873,7.171,3.873,12s3.777,8.721,8.606,8.721c3.132,0,4.916-1.258,6.059-2.401c0.927-0.927,1.537-2.251,1.777-4.059L12.479,14.265z" />
@@ -37,38 +32,14 @@ const GoogleIcon = (props: React.ComponentProps<"svg">) => (
 export default function SignUpPage() {
   const router = useRouter();
 
-  const [pageState, setPageState] = useState<PageState>("sign-up-form");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
-  const [otp, setOtp] = useState("");
-  const [resendCooldown, setResendCooldown] = useState(0);
-  const cooldownRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  const startCooldown = () => {
-    setResendCooldown(RESEND_COOLDOWN);
-    cooldownRef.current = setInterval(() => {
-      setResendCooldown((s) => {
-        if (s <= 1) {
-          clearInterval(cooldownRef.current!);
-          return 0;
-        }
-        return s - 1;
-      });
-    }, 1000);
-  };
-
-  useEffect(
-    () => () => {
-      if (cooldownRef.current) clearInterval(cooldownRef.current);
-    },
-    []
-  );
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -113,56 +84,12 @@ export default function SignUpPage() {
         return;
       }
 
-      setPageState("otp-entry");
-      startCooldown();
+      router.push("/~/home");
+      router.refresh();
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "An error occurred");
     } finally {
       setIsLoading(false);
-    }
-  };
-
-
-  const handleVerifyOtp = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (otp.length < 8) {
-      setError("Please enter the full 8-digit code");
-      return;
-    }
-    setError(null);
-    setIsLoading(true);
-
-    try {
-      const supabase = createClient();
-      const { error } = await supabase.auth.verifyOtp({
-        email,
-        token: otp,
-        type: "signup",
-      });
-      if (error) throw error;
-
-      router.push("/~");
-      router.refresh();
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Invalid or expired code");
-      setOtp("");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleResend = async () => {
-    if (resendCooldown > 0) return;
-    setError(null);
-
-    try {
-      const supabase = createClient();
-      const { error } = await supabase.auth.resend({ type: "signup", email });
-      if (error) throw error;
-      startCooldown();
-      setOtp("");
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Failed to resend code");
     }
   };
 
@@ -175,7 +102,7 @@ export default function SignUpPage() {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: `${window.location.origin}/auth/callback?next=/~`,
+          redirectTo: `${window.location.origin}/auth/callback?next=/~/home`,
           queryParams: { prompt: "select_account" },
         },
       });
@@ -186,92 +113,9 @@ export default function SignUpPage() {
     }
   };
 
-  // ── OTP entry screen ───────────────────────────────────────────────────────
-  if (pageState === "otp-entry") {
-    // One Tap intentionally hidden during OTP step — user already chose email flow
-    return (
-      <div className="mx-auto space-y-6 sm:w-sm">
-        <div className="flex flex-col items-center space-y-3 text-center">
-          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">
-            <MailIcon className="h-7 w-7 text-primary" />
-          </div>
-          <div className="space-y-1">
-            <h1 className="font-bold text-2xl tracking-wide">
-              Check Your Email
-            </h1>
-            <p className="text-base text-muted-foreground">
-              We sent an 8-digit code to{" "}
-              <span className="font-medium text-foreground">{email}</span>
-            </p>
-          </div>
-        </div>
-
-        <form className="space-y-4" onSubmit={handleVerifyOtp}>
-          <OTPInput value={otp} onChange={setOtp} disabled={isLoading} />
-
-          {error && (
-            <p className="text-sm text-destructive rounded-md bg-destructive/10 px-3 py-2 text-center">
-              {error}
-            </p>
-          )}
-
-          <Button
-            className="w-full"
-            type="submit"
-            disabled={isLoading || otp.length < 8}
-          >
-            {isLoading ? (
-              <>
-                <Loader2Icon className="mr-2 h-4 w-4 animate-spin" />
-                Verifying…
-              </>
-            ) : (
-              "Verify Email"
-            )}
-          </Button>
-        </form>
-
-        <div className="rounded-md border bg-muted/40 px-4 py-3 text-sm text-muted-foreground">
-          <div className="flex items-start gap-2">
-            <MailIcon className="mt-0.5 h-4 w-4 shrink-0" />
-            <span>
-              Didn&apos;t receive it?{" "}
-              {resendCooldown > 0 ? (
-                <span>Resend in {resendCooldown}s</span>
-              ) : (
-                <button
-                  type="button"
-                  onClick={handleResend}
-                  className="underline underline-offset-4 hover:text-foreground"
-                >
-                  Resend code
-                </button>
-              )}{" "}
-              or check your spam folder.
-            </span>
-          </div>
-        </div>
-
-        <button
-          type="button"
-          onClick={() => {
-            setPageState("sign-up-form");
-            setOtp("");
-            setError(null);
-          }}
-          className="w-full text-center text-sm text-muted-foreground underline underline-offset-4 hover:text-foreground"
-        >
-          Use a different email
-        </button>
-      </div>
-    );
-  }
-
-  // ── Sign-up form ───────────────────────────────────────────────────────────
   return (
     <>
-      {/* One Tap shown only on the sign-up form step */}
-      <GoogleOneTap next="/~" />
+      <GoogleOneTap next="/~/home" />
 
       <div className="mx-auto space-y-4 sm:w-sm">
         <div className="flex flex-col space-y-1">
