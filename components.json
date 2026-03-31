@@ -20,7 +20,7 @@
     "hooks": "@/hooks"
   },
   "registries": {
-    "@efferd": "https://efferd.com/r/{name}.json",
+    "@efferd": "https://efferd.com/r/{style}/{name}.json",
     "@react-bits": "https://reactbits.dev/r/{name}.json",
     "@magicui": "https://magicui.design/r/{name}",
     "@motion-primitives": "https://motion-primitives.com/c/{name}.json"

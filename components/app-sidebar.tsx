@@ -52,7 +52,7 @@ const NAV_MAIN: Record<AccountType, NavItem[]> = {
     { title: "Job Search", url: "/~/jobs", icon: IconSearch },
     { title: "My Applications", url: "/~/applications", icon: IconClipboardList },
     { title: "Tests", url: "/~/tests", icon: IconChartBar },
-    { title: "Resume", url: "/~/resume", icon: IconFileDescription },
+    { title: "Resume Builder", url: "/~/resume", icon: IconFileDescription },
     { title: "Resume Analyzer", url: "/~/resume-analyzer", icon: IconFileAnalytics },
     { title: "Events", url: "/~/events", icon: IconCalendarEvent },
   ],

@@ -677,15 +677,15 @@ export function RecruiterSettingsClient({ userProfile, initialData }: Props) {
         // Sync with global profiles table and Auth metadata
         const newDisplayName = companyName.trim() || userProfile.display_name
 
-        await supabase.from("profiles").update({ 
+        await supabase.from("profiles").update({
           display_name: newDisplayName,
           username: trimmedUsername,
         }).eq("id", userProfile.id)
 
         await supabase.auth.updateUser({
-          data: { 
+          data: {
             display_name: newDisplayName,
-            username: trimmedUsername 
+            username: trimmedUsername
           }
         })
 
@@ -996,7 +996,7 @@ export function RecruiterSettingsClient({ userProfile, initialData }: Props) {
                       Platform App URL
                     </Label>
                     <Input
-                      placeholder="https://platform.acadledger.com"
+                      placeholder="https://platform.SkillBridge.com"
                       type="url"
                       value={websiteUrl}
                       onChange={(e) => handleWebsiteUrl(e.target.value)}

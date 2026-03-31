@@ -12,19 +12,19 @@ import { PrivacyScrollNav } from "@/components/legal/scroll-nav"; // client comp
 
 // ─── Data ─────────────────────────────────────────────────────────────────────
 
-const EFFECTIVE_DATE = "July 18, 2025";
+const EFFECTIVE_DATE = "March 31, 2026";
 
 export const sectionsMeta = [
-  { id: "introduction",    short: "Introduction"     },
-  { id: "what-we-collect", short: "What We Collect"  },
-  { id: "how-we-use",      short: "How We Use It"    },
-  { id: "sharing",         short: "Sharing"          },
-  { id: "security",        short: "Security"         },
-  { id: "retention",       short: "Retention"        },
-  { id: "your-rights",     short: "Your Rights"      },
-  { id: "ai-features",     short: "Future Features"  },
-  { id: "changes",         short: "Policy Changes"   },
-  { id: "contact",         short: "Contact"          },
+  { id: "introduction", short: "Introduction" },
+  { id: "what-we-collect", short: "What We Collect" },
+  { id: "how-we-use", short: "How We Use It" },
+  { id: "sharing", short: "Sharing" },
+  { id: "security", short: "Security" },
+  { id: "retention", short: "Retention" },
+  { id: "your-rights", short: "Your Rights" },
+  { id: "ai-features", short: "Future Features" },
+  { id: "changes", short: "Policy Changes" },
+  { id: "contact", short: "Contact" },
 ];
 
 // ─── Section content ──────────────────────────────────────────────────────────
@@ -33,17 +33,15 @@ function Introduction() {
   return (
     <>
       <p>
-        Welcome to <strong>PlaceTrix</strong>. This Privacy Policy explains how we
-        ("PlaceTrix," "we," "us," or "our") collect, use, share, and protect
-        information in relation to our mobile application and services (collectively,
-        the "Service"). This policy applies to all users — Students, Teachers/TPOs,
-        and Administrators.
+        Welcome to <strong>SkillBridge</strong>. This Privacy Policy explains how we
+        ("SkillBridge," "we," "us," or "our") collect, use, share, and protect
+        information in relation to our platform and services (collectively,
+        the "Service"). This policy applies to all users — Students, Job Seekers,
+        Employers, and Recruiters.
       </p>
       <p>
-        Your use of PlaceTrix is managed by your educational institution (the
-        "Institution"), which acts as the Data Controller. PlaceTrix acts as the
-        Data Processor on their behalf. By using our Service, you agree to the
-        practices described in this policy.
+        By using our Service to discover opportunities, manage verified credentials,
+        and connect with employers, you agree to the practices described in this policy.
       </p>
     </>
   );
@@ -52,23 +50,22 @@ function Introduction() {
 function WhatWeCollect() {
   return (
     <>
-      <h3>From Your Institution</h3>
-      <p>
-        Your Institution provides us with: your full name, institutional email address,
-        batch or graduation year, and your University PRN and/or Roll Number.
-      </p>
       <h3>From You Directly</h3>
       <p>
-        When you use the Service, you may provide: your mobile number and parent's
-        mobile number, current and permanent address, HSC/Diploma percentage and
-        semester GPAs, resume or CV uploads, event RSVP responses, and mock test
-        answers and results.
+        When you use the Service, you may provide: your name, email address,
+        mobile number, educational background, skills, interests, resume or CV uploads,
+        and application history.
+      </p>
+      <h3>From Institutional Partners & Blockchain</h3>
+      <p>
+        If applicable, verified academic credentials and achievements may be securely linked
+        to your profile via institutional partners or decentralized ledger technology to validate
+        your qualifications.
       </p>
       <h3>Automatically Collected</h3>
       <p>
-        We automatically collect attendance data (Event ID, timestamp, TPO ID) during
-        QR scans, usage metrics such as features used and time spent, and device
-        information including model, OS version, and push notification identifiers.
+        We automatically collect usage metrics, application statistics, interaction data
+        with our AI recommendation engine, and device information to optimize your experience.
       </p>
     </>
   );
@@ -79,14 +76,13 @@ function HowWeUse() {
     <>
       <p>We use the information we collect strictly to provide and improve the Service. This includes:</p>
       <ul>
-        <li>Managing your account and personalizing your experience.</li>
-        <li>Facilitating placement opportunities and employer connections.</li>
-        <li>Tracking event attendance via QR-based check-ins.</li>
-        <li>Conducting assessments and delivering your results.</li>
-        <li>Sending transactional push notifications and emails.</li>
-        <li>Generating anonymized institutional reports and analytics for your TPO.</li>
+        <li>Managing your account and personalizing your dashboard.</li>
+        <li>Providing AI-driven job and internship recommendations based on your profile.</li>
+        <li>Facilitating verified credential sharing and employer connections.</li>
+        <li>Processing your applications to jobs and internships.</li>
+        <li>Sending transactional notifications and relevant opportunity alerts.</li>
       </ul>
-      <p>We do not sell your personal information or use it for advertising outside the scope of placement facilitation.</p>
+      <p>We do not sell your personal information or use it for advertising outside the scope of career facilitation.</p>
     </>
   );
 }
@@ -96,9 +92,8 @@ function Sharing() {
     <>
       <p>We share your information only in the following limited circumstances:</p>
       <ul>
-        <li><strong>Your Institution</strong> — TPOs and Administrators have access to your profile, academic data, and platform activity.</li>
-        <li><strong>Potential Employers</strong> — When you explicitly apply for an opportunity, your profile and resume are shared with that employer.</li>
-        <li><strong>Service Providers</strong> — Google Cloud Platform and Firebase process data on our behalf under strict data processing agreements.</li>
+        <li><strong>Potential Employers & Recruiters</strong> — When you explicitly apply for an opportunity or opt-in to be discoverable, your profile, verified credentials, and resume are shared with employers.</li>
+        <li><strong>Service Providers</strong> — Cloud hosting and AI infrastructure providers process data on our behalf under strict data processing agreements.</li>
         <li><strong>Legal Obligations</strong> — We may disclose information when required by law, court order, or governmental authority.</li>
       </ul>
     </>
@@ -109,7 +104,7 @@ function Security() {
   return (
     <>
       <p>
-        We store your data on Google Cloud Platform and Firebase, which provide
+        We store your data on secure cloud infrastructure, which provides
         encryption in transit (TLS) and at rest. Access to personal data is restricted
         to authorized personnel with a legitimate need.
       </p>
@@ -125,9 +120,9 @@ function Security() {
 function Retention() {
   return (
     <p>
-      Your data is retained for as long as you are an active user. Following graduation
-      or account deactivation, data retention is governed by your Institution's policies.
-      Contact your TPO or Administrator for details specific to your institution.
+      Your data is retained for as long as you maintain an active account on SkillBridge.
+      If you choose to delete your account, your personal data will be securely erased,
+      though certain anonymized or blockchain-anchored records may remain immutable by their nature.
     </p>
   );
 }
@@ -137,14 +132,13 @@ function YourRights() {
     <>
       <p>You have the following rights with respect to your personal data:</p>
       <ul>
-        <li><strong>Access & Correction</strong> — View and edit your profile information directly in the app.</li>
+        <li><strong>Access & Correction</strong> — View and edit your profile information, skills, and preferences directly in the app.</li>
         <li><strong>Resume Management</strong> — Upload, replace, or remove your resume at any time.</li>
-        <li><strong>Account Deletion</strong> — Contact your Institution's Administrator or TPO to request deletion.</li>
+        <li><strong>Account Deletion</strong> — Request deletion of your account and personal data through the platform settings.</li>
       </ul>
       <p>
-        Where required by applicable law (such as India's Digital Personal Data Protection
-        Act, 2023), you may also have rights to data portability and the right to withdraw
-        consent.
+        Where required by applicable law, you may also have rights to data portability and the right to withdraw
+        consent for specific data uses.
       </p>
     </>
   );
@@ -153,10 +147,10 @@ function YourRights() {
 function AiFeatures() {
   return (
     <p>
-      We may introduce an AI-powered Analytics Assistant for TPOs in the future, operating
-      exclusively on aggregated or anonymized data. This will be disclosed in an updated
-      Privacy Policy prior to launch, with in-app notification before any AI-powered
-      functionality affecting personal data is enabled.
+      SkillBridge uses AI to provide intelligent internship and job recommendations.
+      Our recommendation engine processes your profile data (skills, interests, experience)
+      against available opportunities to calculate match scores. Your data is not used to train
+      third-party foundational models without your explicit consent.
     </p>
   );
 }
@@ -166,7 +160,7 @@ function Changes() {
     <p>
       We may update this Privacy Policy from time to time to reflect changes in our
       practices or applicable law. Material changes will update the "Effective Date" above
-      and be notified via the app. Continued use after changes constitutes your acceptance.
+      and be notified via the platform. Continued use after changes constitutes your acceptance.
     </p>
   );
 }
@@ -175,13 +169,12 @@ function Contact() {
   return (
     <>
       <p>
-        For questions about your personal data, contact your Institution's TPO or
-        Administrator — they are best positioned to assist with account-level requests.
+        For questions about your personal data or technical inquiries, please reach out to our team.
       </p>
       <p>
-        For technical inquiries, reach us at:{" "}
-        <a href="mailto:vishalraut2106@gmail.com">
-          vishalraut2106@gmail.com
+        Email us at:{" "}
+        <a href="mailto:support@SkillBridge.com">
+          support@SkillBridge.com
         </a>
       </p>
     </>
@@ -189,29 +182,29 @@ function Contact() {
 }
 
 const sectionContent: Record<string, React.ReactNode> = {
-  introduction:    <Introduction />,
+  introduction: <Introduction />,
   "what-we-collect": <WhatWeCollect />,
-  "how-we-use":    <HowWeUse />,
-  sharing:         <Sharing />,
-  security:        <Security />,
-  retention:       <Retention />,
-  "your-rights":   <YourRights />,
-  "ai-features":   <AiFeatures />,
-  changes:         <Changes />,
-  contact:         <Contact />,
+  "how-we-use": <HowWeUse />,
+  sharing: <Sharing />,
+  security: <Security />,
+  retention: <Retention />,
+  "your-rights": <YourRights />,
+  "ai-features": <AiFeatures />,
+  changes: <Changes />,
+  contact: <Contact />,
 };
 
 const sectionTitles: Record<string, string> = {
-  introduction:      "Introduction",
+  introduction: "Introduction",
   "what-we-collect": "Information We Collect",
-  "how-we-use":      "How We Use Your Information",
-  sharing:           "How We Share Your Information",
-  security:          "Data Storage & Security",
-  retention:         "Data Retention",
-  "your-rights":     "Your Rights & Choices",
-  "ai-features":     "Future AI-Powered Features",
-  changes:           "Changes to This Policy",
-  contact:           "Contact Us",
+  "how-we-use": "How We Use Your Information",
+  sharing: "How We Share Your Information",
+  security: "Data Storage & Security",
+  retention: "Data Retention",
+  "your-rights": "Your Rights & Choices",
+  "ai-features": "Future AI-Powered Features",
+  changes: "Changes to This Policy",
+  contact: "Contact Us",
 };
 
 // ─── Section Block ────────────────────────────────────────────────────────────
@@ -288,9 +281,8 @@ export default function PrivacyPolicyPage() {
           </h1>
 
           <p className="fade-in slide-in-from-bottom-6 animate-in fill-mode-backwards delay-300 duration-500 ease-out mt-5 max-w-lg text-sm text-muted-foreground leading-relaxed sm:text-base">
-            How PlaceTrix collects, uses, and protects your data — explained plainly.
-            Your Institution is the Data Controller; PlaceTrix acts as the Data Processor
-            on their behalf.
+            How SkillBridge collects, uses, and protects your data — explained plainly.
+            Our priority is your privacy, security, and career success.
           </p>
 
           <div className="fade-in slide-in-from-bottom-6 animate-in fill-mode-backwards delay-400 duration-500 ease-out mt-8 flex flex-wrap gap-x-6 gap-y-2 border-t pt-5 text-[11px] font-mono text-muted-foreground/50">

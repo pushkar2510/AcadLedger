@@ -12,24 +12,24 @@ import { ToSScrollNav } from "@/components/legal/scroll-nav"; // client componen
 
 // ─── Data ─────────────────────────────────────────────────────────────────────
 
-const EFFECTIVE_DATE = "July 18, 2025";
+const EFFECTIVE_DATE = "March 31, 2026";
 
 export const sectionsMeta = [
-  { id: "acceptance",    short: "Acceptance"           },
-  { id: "eligibility",   short: "Eligibility"          },
-  { id: "accounts",      short: "Accounts"             },
-  { id: "permitted-use", short: "Permitted Use"        },
-  { id: "prohibited",    short: "Prohibited Conduct"   },
-  { id: "content",       short: "User Content"         },
-  { id: "assessments",   short: "Assessments"          },
-  { id: "ip",            short: "Intellectual Property"},
-  { id: "third-party",   short: "Third-Party Services" },
-  { id: "disclaimers",   short: "Disclaimers"          },
-  { id: "liability",     short: "Liability"            },
-  { id: "termination",   short: "Termination"          },
-  { id: "governing-law", short: "Governing Law"        },
-  { id: "changes",       short: "Changes"              },
-  { id: "contact",       short: "Contact"              },
+  { id: "acceptance", short: "Acceptance" },
+  { id: "eligibility", short: "Eligibility" },
+  { id: "accounts", short: "Accounts" },
+  { id: "permitted-use", short: "Permitted Use" },
+  { id: "prohibited", short: "Prohibited Conduct" },
+  { id: "content", short: "User Content" },
+  { id: "assessments", short: "Assessments" },
+  { id: "ip", short: "Intellectual Property" },
+  { id: "third-party", short: "Third-Party Services" },
+  { id: "disclaimers", short: "Disclaimers" },
+  { id: "liability", short: "Liability" },
+  { id: "termination", short: "Termination" },
+  { id: "governing-law", short: "Governing Law" },
+  { id: "changes", short: "Changes" },
+  { id: "contact", short: "Contact" },
 ];
 
 // ─── Section content ──────────────────────────────────────────────────────────
@@ -37,11 +37,11 @@ export const sectionsMeta = [
 function Acceptance() {
   return (
     <p>
-      By accessing or using the PlaceTrix platform ("Service"), you agree to be bound by
+      By accessing or using the SkillBridge platform ("Service"), you agree to be bound by
       these Terms of Service ("Terms") and our{" "}
       <Link href="/privacy-policy">Privacy Policy</Link>, incorporated by reference. If
       you do not agree, you may not use the Service. These Terms constitute a binding
-      agreement between you and PlaceTrix.
+      agreement between you and SkillBridge.
     </p>
   );
 }
@@ -50,13 +50,12 @@ function Eligibility() {
   return (
     <>
       <p>
-        The Service is available exclusively to students, faculty, Training & Placement
-        Officers (TPOs), and administrators of educational institutions ("Institutions")
-        that have a valid agreement with PlaceTrix.
+        The Service is available to students, professionals, recruiters, and employers
+        ("Users") looking to connect for internships, jobs, and placement opportunities.
       </p>
       <p>
         You must be at least 13 years of age to use the Service. By using it, you confirm
-        that you meet these requirements and that your Institution has authorized your access.
+        that you meet these requirements.
       </p>
     </>
   );
@@ -66,14 +65,14 @@ function Accounts() {
   return (
     <>
       <p>
-        Accounts are provisioned by your Institution. You are solely responsible for
+        You may create an account directly or through authorized institutional partners. You are solely responsible for
         maintaining the confidentiality of your credentials and all activity under your
         account.
       </p>
       <ul>
-        <li>Notify your TPO or Administrator immediately of any unauthorized account use.</li>
+        <li>Notify our support team immediately of any unauthorized account use.</li>
         <li>Do not share or transfer your account credentials to any other person.</li>
-        <li>PlaceTrix is not liable for losses arising from your failure to secure your credentials.</li>
+        <li>SkillBridge is not liable for losses arising from your failure to secure your credentials.</li>
       </ul>
     </>
   );
@@ -84,11 +83,11 @@ function PermittedUse() {
     <>
       <p>You may use the Service only for its intended purposes, including:</p>
       <ul>
-        <li>Taking mock tests and assessments to prepare for placements.</li>
-        <li>Tracking your academic progress and placement readiness.</li>
+        <li>Discovering internships, jobs, and career opportunities using AI recommendations.</li>
+        <li>Managing your verified credentials and academic progress.</li>
         <li>Applying for placement opportunities facilitated through the platform.</li>
-        <li>Attending and managing placement-related events.</li>
-        <li>Uploading and managing your resume and academic records.</li>
+        <li>Posting jobs or internships to hire matching talent, if you are an employer.</li>
+        <li>Uploading and managing your resume, portfolio, and profile details.</li>
       </ul>
     </>
   );
@@ -103,8 +102,8 @@ function Prohibited() {
         <li>Attempt unauthorized access to any part of the Service or its connected systems.</li>
         <li>Reverse-engineer, decompile, or disassemble any software associated with the Service.</li>
         <li>Upload viruses, malware, or any other malicious code.</li>
-        <li>Impersonate any person or entity, or misrepresent your institutional affiliation.</li>
-        <li>Share, publish, or distribute assessment questions, answers, or any proprietary platform content.</li>
+        <li>Impersonate any person or entity, or misrepresent your qualifications or institutional affiliation.</li>
+        <li>Post fraudulent jobs, scams, or misleading opportunities.</li>
         <li>Interfere with or disrupt the integrity or performance of the Service or its infrastructure.</li>
         <li>Use automated bots or scripts to access the Service without prior written consent.</li>
       </ul>
@@ -116,8 +115,8 @@ function Content() {
   return (
     <>
       <p>
-        You retain ownership of content you submit (e.g., resumes, profile information).
-        By submitting content, you grant PlaceTrix a limited, non-exclusive, royalty-free
+        You retain ownership of content you submit (e.g., resumes, profile information, job postings).
+        By submitting content, you grant SkillBridge a limited, non-exclusive, royalty-free
         license to store, process, and display that content solely to provide the Service.
       </p>
       <p>
@@ -128,18 +127,17 @@ function Content() {
   );
 }
 
-function Assessments() {
+function ApplicationProcess() {
   return (
     <>
-      <p>By participating in any assessment, you agree to:</p>
+      <p>When applying for opportunities through SkillBridge, you agree to:</p>
       <ul>
-        <li>Complete all assessments independently without unauthorized assistance.</li>
-        <li>Not share, reproduce, screenshot, or distribute any assessment content in any form.</li>
-        <li>Accept that your results may be shared with your Institution's TPO and Administrators.</li>
+        <li>Provide accurate and verifiable information regarding your skills and experience.</li>
+        <li>Not use AI or automated tools to spam recruiters or apply in bulk without legitimate interest.</li>
+        <li>Accept that your profile and application details will be shared with the prospective employer.</li>
       </ul>
       <p>
-        Violation of academic integrity may result in immediate suspension or permanent
-        termination of your account, as determined by your Institution and PlaceTrix.
+        We reserve the right to suspend accounts that engage in fraudulent applications or spamming.
       </p>
     </>
   );
@@ -149,10 +147,10 @@ function IntellectualProperty() {
   return (
     <p>
       All content, features, and functionality of the Service — including text, graphics,
-      logos, question banks, UI design, and underlying software — are the exclusive property
-      of PlaceTrix and/or its licensors, protected by applicable intellectual property laws.
+      logos, job matching algorithms, UI design, and underlying software — are the exclusive property
+      of SkillBridge and/or its licensors, protected by applicable intellectual property laws.
       You may not reproduce, distribute, modify, or commercially exploit any part of the
-      Service without prior written consent from PlaceTrix.
+      Service without prior written consent from SkillBridge.
     </p>
   );
 }
@@ -160,8 +158,8 @@ function IntellectualProperty() {
 function ThirdParty() {
   return (
     <p>
-      The Service relies on third-party providers including Google Cloud Platform and
-      Firebase, subject to their own terms and privacy policies. PlaceTrix is not
+      The Service relies on third-party providers including cloud hosting platforms and
+      AI APIs, subject to their own terms and privacy policies. SkillBridge is not
       responsible for the practices, availability, or content of any third-party service.
       Links within the platform are provided for convenience only and do not constitute
       an endorsement.
@@ -174,12 +172,12 @@ function Disclaimers() {
     <>
       <p>
         The Service is provided on an "as is" and "as available" basis without warranties
-        of any kind, express or implied. PlaceTrix expressly disclaims all warranties,
+        of any kind, express or implied. SkillBridge expressly disclaims all warranties,
         including merchantability, fitness for a particular purpose, and non-infringement.
       </p>
       <p>
-        PlaceTrix does not warrant that the Service will be uninterrupted, error-free, or
-        free of harmful components. Placement outcomes are not guaranteed.
+        SkillBridge does not warrant that the Service will be uninterrupted, error-free, or
+        free of harmful components. Job offers and placement outcomes are solely at the discretion of employers and are not guaranteed by SkillBridge.
       </p>
     </>
   );
@@ -188,7 +186,7 @@ function Disclaimers() {
 function Liability() {
   return (
     <p>
-      To the maximum extent permitted by applicable law, PlaceTrix and its affiliates,
+      To the maximum extent permitted by applicable law, SkillBridge and its affiliates,
       officers, employees, agents, and licensors shall not be liable for any indirect,
       incidental, special, consequential, or punitive damages — including loss of data,
       profits, or goodwill — arising from your use of or inability to use the Service,
@@ -200,7 +198,7 @@ function Liability() {
 function Termination() {
   return (
     <p>
-      PlaceTrix or your Institution may suspend or terminate your access at any time, for
+      SkillBridge may suspend or terminate your access at any time, for
       any reason, without prior notice or liability. Upon termination, your right to use
       the Service immediately ceases. Sections on Intellectual Property, Disclaimers,
       Limitation of Liability, and Governing Law survive termination.
@@ -211,9 +209,8 @@ function Termination() {
 function GoverningLaw() {
   return (
     <p>
-      These Terms are governed by the laws of India, without regard to conflict of law
-      principles. Any dispute shall be subject to the exclusive jurisdiction of the
-      competent courts in Nashik, Maharashtra, India. You agree to first attempt informal
+      These Terms are governed by applicable laws without regard to conflict of law
+      principles. You agree to first attempt informal
       resolution by contacting us before initiating formal proceedings.
     </p>
   );
@@ -223,7 +220,7 @@ function ChangesSection() {
   return (
     <p>
       We reserve the right to modify these Terms at any time. Material changes will update
-      the "Effective Date" above and be notified via the app. Continued use after the
+      the "Effective Date" above and be notified via the platform. Continued use after the
       effective date constitutes your acceptance. If you do not agree to updated Terms,
       you must stop using the Service.
     </p>
@@ -234,12 +231,11 @@ function ContactSection() {
   return (
     <>
       <p>
-        If you have questions about these Terms, first contact your Institution's TPO or
-        Administrator. For matters requiring direct communication with PlaceTrix:
+        If you have questions about these Terms, please contact our support team:
       </p>
       <p>
-        <a href="mailto:vishalraut2106@gmail.com">
-          vishalraut2106@gmail.com
+        <a href="mailto:support@SkillBridge.com">
+          support@SkillBridge.com
         </a>
       </p>
     </>
@@ -247,39 +243,39 @@ function ContactSection() {
 }
 
 const sectionContent: Record<string, React.ReactNode> = {
-  acceptance:      <Acceptance />,
-  eligibility:     <Eligibility />,
-  accounts:        <Accounts />,
+  acceptance: <Acceptance />,
+  eligibility: <Eligibility />,
+  accounts: <Accounts />,
   "permitted-use": <PermittedUse />,
-  prohibited:      <Prohibited />,
-  content:         <Content />,
-  assessments:     <Assessments />,
-  ip:              <IntellectualProperty />,
-  "third-party":   <ThirdParty />,
-  disclaimers:     <Disclaimers />,
-  liability:       <Liability />,
-  termination:     <Termination />,
+  prohibited: <Prohibited />,
+  content: <Content />,
+  assessments: <ApplicationProcess />,
+  ip: <IntellectualProperty />,
+  "third-party": <ThirdParty />,
+  disclaimers: <Disclaimers />,
+  liability: <Liability />,
+  termination: <Termination />,
   "governing-law": <GoverningLaw />,
-  changes:         <ChangesSection />,
-  contact:         <ContactSection />,
+  changes: <ChangesSection />,
+  contact: <ContactSection />,
 };
 
 const sectionTitles: Record<string, string> = {
-  acceptance:      "Acceptance of Terms",
-  eligibility:     "Eligibility",
-  accounts:        "User Accounts",
+  acceptance: "Acceptance of Terms",
+  eligibility: "Eligibility",
+  accounts: "User Accounts",
   "permitted-use": "Permitted Use",
-  prohibited:      "Prohibited Conduct",
-  content:         "User-Submitted Content",
-  assessments:     "Assessments & Academic Integrity",
-  ip:              "Intellectual Property",
-  "third-party":   "Third-Party Services",
-  disclaimers:     "Disclaimers",
-  liability:       "Limitation of Liability",
-  termination:     "Termination",
+  prohibited: "Prohibited Conduct",
+  content: "User-Submitted Content",
+  assessments: "Applications & Integrity",
+  ip: "Intellectual Property",
+  "third-party": "Third-Party Services",
+  disclaimers: "Disclaimers",
+  liability: "Limitation of Liability",
+  termination: "Termination",
   "governing-law": "Governing Law & Disputes",
-  changes:         "Changes to These Terms",
-  contact:         "Contact Us",
+  changes: "Changes to These Terms",
+  contact: "Contact Us",
 };
 
 // ─── Section Block ────────────────────────────────────────────────────────────
@@ -354,7 +350,7 @@ export default function TermsOfServicePage() {
           </h1>
 
           <p className="fade-in slide-in-from-bottom-6 animate-in fill-mode-backwards delay-300 duration-500 ease-out mt-5 max-w-lg text-sm text-muted-foreground leading-relaxed sm:text-base">
-            The rules and expectations for using PlaceTrix. By accessing the Service,
+            The rules and expectations for using SkillBridge. By accessing the Service,
             you agree to be bound by these Terms.
           </p>
 

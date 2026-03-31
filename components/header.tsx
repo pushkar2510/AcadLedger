@@ -44,11 +44,11 @@ function ThemeToggle() {
 function UserAvatar({ user }: { user: UserProfile }) {
   const initials = user.display_name
     ? user.display_name
-        .split(" ")
-        .map((n) => n[0])
-        .join("")
-        .toUpperCase()
-        .slice(0, 2)
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2)
     : user.email[0].toUpperCase()
 
   // Derive full URL from the stored path — handles both Supabase storage
@@ -176,10 +176,10 @@ export function Header({ user = null }: HeaderProps) {
           "flex h-14 w-full items-center justify-between px-4 md:h-12 md:transition-all md:ease-out",
           { "md:px-2": scrolled }
         )}
-      > 
-      {/* font-bold p-2 */}
+      >
+        {/* font-bold p-2 */}
         <Link href="/" className="font-bold p-2">
-          AceLedger
+          SkillBridge
         </Link>
 
         {/* Desktop nav */}
